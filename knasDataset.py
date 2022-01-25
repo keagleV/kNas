@@ -1,10 +1,9 @@
 from torchvision.datasets import KMNIST
 from torchvision.transforms import ToTensor
 from torchvision.transforms import transforms
-
-from torch import Generator
 from torch.utils.data import random_split
 from torch.utils.data import DataLoader
+from torch import Generator
 
 from os import path
 
@@ -65,9 +64,9 @@ class KnasDatasetKmnist:
 
 		# Dataset Transform
 		self.DatasetTransforms = transforms.Compose([
-           # transforms.Resize(32),
-            transforms.ToTensor(),
-           # transforms.Normalize((0.1307,), (0.3081,)),
+           transforms.Resize(32),
+           transforms.ToTensor(),
+           transforms.Normalize((0.1307,), (0.3081,)),
 
 
         ])

@@ -3,20 +3,22 @@
 
 
 from argparse import ArgumentParser
-from os import path
-from re import match
-from re import search
 
 from knasLogging import KNasLogging
 from knasConfFile import KNasConfFile
 from knasDataset import KnasDatasetKmnist
 from knasCNN import KNasCNN
+
+import torch
 from torch import cuda
 from torch.nn import NLLLoss
-import torch
 from torch.optim import Adam
 from sklearn.metrics import classification_report
 from sklearn.metrics import accuracy_score
+
+from os import path
+from re import match
+from re import search
 
 from time import time
 import numpy as np
@@ -221,6 +223,7 @@ class KNas:
 		# Loss function
 		lossFn = NLLLoss()
 
+		# Model performance evaluation parameters
 		modelPerfomanceStatus = {
 			"training_time": [],
 			"train_loss": [],
@@ -372,6 +375,9 @@ class KNas:
 
 
 if __name__ == "__main__":
+
+
+	#torch.backends.cudnn.enabled = False
 
 	# Creating the logging module for the KNAS
 	logModule = KNasLogging()
