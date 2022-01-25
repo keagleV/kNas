@@ -45,7 +45,9 @@ class CNLayer():
 		self.maxPoolKernelSize = maxPoolKernelSize
 
 
+	
 	def create_cn_layer(self):
+
 		'''
 			this function creates a CN layer based on the parameters given in 
 			the constructor of the class
@@ -84,7 +86,6 @@ class CNLayer():
 
 		if self.maxPoolKernelSize!=None:
 			listOfModules.append(MaxPool2d(kernel_size=self.maxPoolKernelSize))
-
 
 		# Returning the sequence of the modules in the layer
 		return Sequential(*listOfModules)
@@ -168,7 +169,7 @@ class DFCLayer():
 			# Checking the second hidden layer
 
 			if self.secNeurons!=None:
-				print("HE")
+
 				# Set the last layer neuron count
 				lastHiddenLayerNeurons = self.secNeurons
 
