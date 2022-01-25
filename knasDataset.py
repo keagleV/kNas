@@ -37,7 +37,7 @@ class KnasDatasetKmnist:
 		for the KNAS program
 	'''
 
-	def __init__(self,datasetLogMod):
+	def __init__(self):
 
 		# Root directory of the training data
 		self.trainDataRoot = str()
@@ -52,7 +52,7 @@ class KnasDatasetKmnist:
 		self.testingData=None
 
 		# Logging module handler
-		self.logModHand= datasetLogMod
+		self.logModHand= KnasDatasetKmnistLogging()
 
 
 	def set_traindata_root_dir(self,trainRootDirectory):

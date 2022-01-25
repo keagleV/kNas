@@ -1,4 +1,4 @@
-#!/usr/bin/python3.8
+#!/usr/bin/python3.9
 
 
 
@@ -7,113 +7,9 @@ from os import path
 from re import match
 from re import search
 
-
-class KNasConfFile:
-	'''
-		This class has implemented the KNAS configuration file parsing opearations
-	'''
-
-	def __init__(self):
-
-		# INIT_LR_REGEX
-		self.initLRr = '\s*INIT_LR\s*=\s*([+-]?([0-9]*[.])?[0-9]+)\s*'
-
-		# BATCH_SIZE_REGEX
-		self.batchSizer ='\s*BATCH_SIZE\s*=\s*([+-]?([0-9]*[.])?[0-9]+)\s*'
-
-		# EPOCHS_REGEX
-		self.epochsr= '\s*EPOCHS\s*=\s*([+-]?([0-9]*[.])?[0-9]+)\s*'
-		
-		# TRAIN_SPLIT_REGEX
-		self.trainSplitr= '\s*TRAIN_SPLIT\s*=\s*([+-]?([0-9]*[.])?[0-9]+)\s*'
-
-		# DEVICE_REGEX
-		self.devicer='\s*DEVICE\s*=\s*(cpu|gpu)\s*'
-
-
-	def get_initlr_value(self,definition):
-
-		'''
-			This function will return the init lr value from the definition line
-		'''
-		definition=definition.strip()
-		
-		if match(self.initLRr,definition):
-			return definition.split("=")[1]
-
-		return None
-
-
-	def get_batchSize_value(self,definition):
-
-		'''
-			This function will return the batch size value from the definition line
-		'''
-		
-		if match(self.batchSizer,definition):
-			return definition.split("=")[1].strip()
-
-		return None
-
-
-	def get_epochs_value(self,definition):
-
-		'''
-			This function will return the epochs value from the definition line
-		'''
-		
-		if match(self.epochsr,definition):
-			return definition.split("=")[1].strip()
-
-		return None
-
-	
-	def get_trainsplit_value(self,definition):
-
-		'''
-			This function will return the train split value from the definition line
-		'''
-		
-		if match(self.trainSplitr,definition):
-			return definition.split("=")[1].strip()
-
-		return None
-
-	def get_device_value(self,definition):
-
-		'''
-			This function will return the device value from the definition line
-		'''
-		
-		if match(self.devicer,definition):
-			return definition.split("=")[1].strip()
-
-		return None
-
-
-class KNasLogging:
-
-	'''
-		This class has implemented the KNasLogging which manages the 
-		logging opeartions for the KNas program
-	'''
-	def __init__(self):
-
-		self.loggingCodes = {
-			'CONFIG_FILE_NOT_FOUND':'Configuration File Not Found',
-
-			'CONFIG_FILE_NOT_SPECIFIED':'Configuration File Not Specified',
-			'CONFIG_FILE_DEF_ERR': 'Config File Definition Error'
-		}
-
-	def knas_log_message(self,message,status,lineNumer=None):
-
-		'''
-			This function will log the message with its corresponding status
-		'''
-
-		print("[{0}]{1} {2} ".format(status,'' if lineNumer is None else ' L-'+str(lineNumer)+'  ' ,message))
-
+from knasLogging import KNasLogging
+from knasConfFile import KNasConfFile
+from knasDataset import KnasDatasetKmnist
 
 
 class KNas:
@@ -121,7 +17,7 @@ class KNas:
 		This class has implemented the Neural Architecture Search through using
 		evolutionary methods.
 	'''
-	def __init__(self,logModule,confModule):
+	def __init__(self,logModule,confModule,datasetModule):
 
 		# Configuration file path
 		self.confFilePath = str()
@@ -130,17 +26,13 @@ class KNas:
 		self.logModHand = logModule
 
 		# KNas configuration file module handler
-		self.confModHand= confModule
+		self.confModHand = confModule
+
+		# KNas dataset handler
+		self.datasetHand = datasetModule
 
 		# KNas parameters
-		self.knasParams={
-		'INIT_LR': 0,
-		'BATCH_SIZE':0,
-		'EPOCHS': 0,
-		'TRAIN_SPLIT': 0,
-		'DEVICE': ''
-		}
-
+		self.knasParams=dict()
 
 
 	def knas_argument_parser(self):
@@ -225,22 +117,57 @@ class KNas:
 					continue
 
 
+				value=self.confModHand.get_trainRootDir_value(line)
+				if value:
+					self.knasParams['TRAIN_ROOT_DIR']=value
+					continue
+
+				value=self.confModHand.get_testRootDir_value(line)
+				if value:
+					self.knasParams['TEST_ROOT_DIR']=value
+					continue
+
 				self.logModHand.knas_log_message(self.logModHand.loggingCodes['CONFIG_FILE_DEF_ERR'],'ERR',lineNum)
 				exit(1)
 
 
+	def knas_setup_dataset(self):
+		'''
+			This function will setup the dataset for the KNAS
+		'''
+
+		# Setting the root directory of the training data
+		self.datasetHand.set_traindata_root_dir(self.knasParams['TRAIN_ROOT_DIR'])
+		
+		# Setting the root directory of the testing data
+		self.datasetHand.set_testdata_root_dir(self.knasParams['TEST_ROOT_DIR'])
+
+
+		# Loading the training data
+		self.datasetHand.load_traindata()
+
+
+		# Loading the testing data
+		self.datasetHand.load_testdata()
+
+
+
+
+
+
 
 logModule = KNasLogging()
+datasetModule = KnasDatasetKmnist()
 confModule = KNasConfFile()
 
-knasObj=KNas(logModule,confModule)
+knasObj=KNas(logModule,confModule,datasetModule)
 
 knasObj.knas_argument_parser()
 
 
 knasObj.knas_parse_conig_file()
 
-
+knasObj.knas_setup_dataset()
 
 
 
