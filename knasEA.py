@@ -42,7 +42,7 @@ class KNasEAIndividual:
 
 		# Fitness value of the individual
 		self.fitnessVal=int()
-		
+
 		# Number of CN layers in the first part of the network
 		self.cnLayersCount=int()
 
@@ -205,12 +205,25 @@ class KNasEA:
 			population.append(KNasEAIndividual(self.maxCNLayers))
 
 
-	
 		return population
 
 
-obj=KNasEA(maxCNLayers=6)
-obj.generate_initial_population()
+	def calculate_fitness(self,population):
+
+		'''
+			This function will calculate the fitness value of the individuals
+			in the population
+		'''
+		pass
+
+
+
+
+
+
+
+# obj=KNasEA(maxCNLayers=6)
+# obj.generate_initial_population()
 
 
 # obj=KNasEAIndividual(6)
