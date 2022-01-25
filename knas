@@ -2,8 +2,117 @@
 
 
 
+from argparse import ArgumentParser
+from os import path
+from re import match
+from re import search
 
 
+class KNasConfFile:
+	'''
+		This class has implemented the KNAS configuration file parsing opearations
+	'''
+
+	def __init__(self):
+
+		# INIT_LR_REGEX
+		self.initLRr = '\s*INIT_LR\s*=\s*([+-]?([0-9]*[.])?[0-9]+)\s*'
+
+		# BATCH_SIZE_REGEX
+		self.batchSizer ='\s*BATCH_SIZE\s*=\s*([+-]?([0-9]*[.])?[0-9]+)\s*'
+
+		# EPOCHS_REGEX
+		self.epochsr= '\s*EPOCHS\s*=\s*([+-]?([0-9]*[.])?[0-9]+)\s*'
+		
+		# TRAIN_SPLIT_REGEX
+		self.trainSplitr= '\s*TRAIN_SPLIT\s*=\s*([+-]?([0-9]*[.])?[0-9]+)\s*'
+
+		# DEVICE_REGEX
+		self.devicer='\s*DEVICE\s*=\s*(cpu|gpu)\s*'
+
+
+	def get_initlr_value(self,definition):
+
+		'''
+			This function will return the init lr value from the definition line
+		'''
+		definition=definition.strip()
+		
+		if match(self.initLRr,definition):
+			return definition.split("=")[1]
+
+		return None
+
+
+	def get_batchSize_value(self,definition):
+
+		'''
+			This function will return the batch size value from the definition line
+		'''
+		
+		if match(self.batchSizer,definition):
+			return definition.split("=")[1].strip()
+
+		return None
+
+
+	def get_epochs_value(self,definition):
+
+		'''
+			This function will return the epochs value from the definition line
+		'''
+		
+		if match(self.epochsr,definition):
+			return definition.split("=")[1].strip()
+
+		return None
+
+	
+	def get_trainsplit_value(self,definition):
+
+		'''
+			This function will return the train split value from the definition line
+		'''
+		
+		if match(self.trainSplitr,definition):
+			return definition.split("=")[1].strip()
+
+		return None
+
+	def get_device_value(self,definition):
+
+		'''
+			This function will return the device value from the definition line
+		'''
+		
+		if match(self.devicer,definition):
+			return definition.split("=")[1].strip()
+
+		return None
+
+
+class KNasLogging:
+
+	'''
+		This class has implemented the KNasLogging which manages the 
+		logging opeartions for the KNas program
+	'''
+	def __init__(self):
+
+		self.loggingCodes = {
+			'CONFIG_FILE_NOT_FOUND':'Configuration File Not Found',
+
+			'CONFIG_FILE_NOT_SPECIFIED':'Configuration File Not Specified',
+			'CONFIG_FILE_DEF_ERR': 'Config File Definition Error'
+		}
+
+	def knas_log_message(self,message,status,lineNumer=None):
+
+		'''
+			This function will log the message with its corresponding status
+		'''
+
+		print("[{0}]{1} {2} ".format(status,'' if lineNumer is None else ' L-'+str(lineNumer)+'  ' ,message))
 
 
 
@@ -12,13 +121,124 @@ class KNas:
 		This class has implemented the Neural Architecture Search through using
 		evolutionary methods.
 	'''
-	def __init__(self):
+	def __init__(self,logModule,confModule):
 
-		pass
+		# Configuration file path
+		self.confFilePath = str()
+
+		# KNas logging module handler
+		self.logModHand = logModule
+
+		# KNas configuration file module handler
+		self.confModHand= confModule
+
+		# KNas parameters
+		self.knasParams={
+		'INIT_LR': 0,
+		'BATCH_SIZE':0,
+		'EPOCHS': 0,
+		'TRAIN_SPLIT': 0,
+		'DEVICE': ''
+		}
 
 
-	
 
+	def knas_argument_parser(self):
+		'''
+			This function has implemented the terminal argument parser of the KNAS
+		'''
+		
+		knasArgParser=ArgumentParser(description='KNAS Program Help')
+
+		knasArgParser.add_argument('-f','--file',  type=str, nargs=1,help='Specify A Config File Name')
+
+		args = knasArgParser.parse_args()
+
+		if args.file:
+
+			self.confFilePath = args.file[0]
+
+			if not path.exists(self.confFilePath):
+				self.logModHand.knas_log_message(self.logModHand.loggingCodes['CONFIG_FILE_NOT_FOUND'],'ERR')
+				exit(1)
+
+		else:
+			self.logModHand.knas_log_message(self.logModHand.loggingCodes['CONFIG_FILE_NOT_SPECIFIED'],'ERR')
+			exit(1)
+
+
+	def knas_parse_conig_file(self):
+		'''
+			This function will parse the configuration file
+		'''
+
+		fhandle=open(self.confFilePath)
+
+		fileLines=fhandle.readlines()
+
+		fhandle.close()
+
+
+		for lineNum,line in enumerate(fileLines):
+
+			line=line.strip()
+
+			# Line number starts from zero, to handle this, we increment it 
+			# to adjust it to start from one.
+			lineNum+=1
+
+			if line:
+
+				if line.startswith('#'):
+					continue
+
+				# TODO inline function return
+				value= self.confModHand.get_initlr_value(line)
+
+				if (value): 
+					self.knasParams['INIT_LR']= float(value)
+					continue
+
+				value= self.confModHand.get_batchSize_value(line)
+
+				if (value): 
+					self.knasParams['BATCH_SIZE']= float(value)
+					continue
+
+
+				value= self.confModHand.get_epochs_value(line)
+
+				if (value): 
+					self.knasParams['EPOCHS']= float(value)
+					continue
+
+				value= self.confModHand.get_trainsplit_value(line)
+
+				if (value): 
+					self.knasParams['TRAIN_SPLIT']= float(value)
+					continue
+
+				value= self.confModHand.get_device_value(line)
+
+				if (value): 
+					self.knasParams['DEVICE']= value
+					continue
+
+
+				self.logModHand.knas_log_message(self.logModHand.loggingCodes['CONFIG_FILE_DEF_ERR'],'ERR',lineNum)
+				exit(1)
+
+
+
+logModule = KNasLogging()
+confModule = KNasConfFile()
+
+knasObj=KNas(logModule,confModule)
+
+knasObj.knas_argument_parser()
+
+
+knasObj.knas_parse_conig_file()
 
 
 

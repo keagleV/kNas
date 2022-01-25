@@ -1,10 +1,8 @@
-#!/usr/bin/python3.8
-
-
 from torchvision.datasets import KMNIST
 from torchvision.transforms import ToTensor
-
 from os import path
+
+
 
 
 class KnasDatasetKmnistLogging:
@@ -28,7 +26,7 @@ class KnasDatasetKmnistLogging:
 			This function will log the message with its corresponding status
 		'''
 
-		print("[{0}] {1} ".format('INF' if status==1 else 'ERR',message))
+		print("[{0}] {1} ".format(status,message))
 
 
 
@@ -82,11 +80,11 @@ class KnasDatasetKmnist:
 
 		# Check for the training data root directory
 		if path.exists(self.trainDataRoot):
-			self.logModHand.knas_kmnist_log_message(self.logModHand.loggingCodes['TRAIN_ROOT_DIR_EXIST'],1)
+			self.logModHand.knas_kmnist_log_message(self.logModHand.loggingCodes['TRAIN_ROOT_DIR_EXIST'],'INF')
 
 		else:
 
-			self.logModHand.knas_kmnist_log_message(self.logModHand.loggingCodes['TRAIN_DATA_DOWNLOAD'],1)
+			self.logModHand.knas_kmnist_log_message(self.logModHand.loggingCodes['TRAIN_DATA_DOWNLOAD'],'INF')
 
 		self.trainingData = KMNIST(root= self.trainDataRoot , train=True, download=True,transform=ToTensor())
 
@@ -100,11 +98,11 @@ class KnasDatasetKmnist:
 		'''
 
 		if path.exists(self.testDataRoot):
-			self.logModHand.knas_kmnist_log_message(self.logModHand.loggingCodes['TEST_ROOT_DIR_EXIST'],1)
+			self.logModHand.knas_kmnist_log_message(self.logModHand.loggingCodes['TEST_ROOT_DIR_EXIST'],'INF')
 
 		else:
 
-			self.logModHand.knas_kmnist_log_message(self.logModHand.loggingCodes['TEST_DATA_DOWNLOAD'],1)
+			self.logModHand.knas_kmnist_log_message(self.logModHand.loggingCodes['TEST_DATA_DOWNLOAD'],'INF')
 
 
 		self.testingData = KMNIST(root=self.testDataRoot, train=False, download=True, transform=ToTensor())
