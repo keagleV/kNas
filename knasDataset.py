@@ -1,5 +1,11 @@
 from torchvision.datasets import KMNIST
 from torchvision.transforms import ToTensor
+from torchvision.transforms import transforms
+
+from torch import Generator
+from torch.utils.data import random_split
+from torch.utils.data import DataLoader
+
 from os import path
 
 
@@ -48,11 +54,23 @@ class KnasDatasetKmnist:
 		# Training Data Object
 		self.trainingData=None
 
+		# Validation Data Object
+		self.valData=None
+
 		# Testing Data Object
 		self.testingData=None
 
 		# Logging module handler
 		self.logModHand= KnasDatasetKmnistLogging()
+
+		# Dataset Transform
+		self.DatasetTransforms = transforms.Compose([
+           # transforms.Resize(32),
+            transforms.ToTensor(),
+           # transforms.Normalize((0.1307,), (0.3081,)),
+
+
+        ])
 
 
 	def set_traindata_root_dir(self,trainRootDirectory):
@@ -86,7 +104,7 @@ class KnasDatasetKmnist:
 
 			self.logModHand.knas_kmnist_log_message(self.logModHand.loggingCodes['TRAIN_DATA_DOWNLOAD'],'INF')
 
-		self.trainingData = KMNIST(root= self.trainDataRoot , train=True, download=True,transform=ToTensor())
+		self.trainingData = KMNIST(root= self.trainDataRoot , train=True, download=True,transform=self.DatasetTransforms)
 
 			#TODO check return value
 
@@ -105,17 +123,42 @@ class KnasDatasetKmnist:
 			self.logModHand.knas_kmnist_log_message(self.logModHand.loggingCodes['TEST_DATA_DOWNLOAD'],'INF')
 
 
-		self.testingData = KMNIST(root=self.testDataRoot, train=False, download=True, transform=ToTensor())
+		self.testingData = KMNIST(root=self.testDataRoot, train=False, download=True, transform=self.DatasetTransforms)
 
+
+
+	def split_training_dataset(self,trainSplit,seed):
+		'''
+			This function will split the training dataset to training data and testing data
+		'''
+		
+
+		# Number of samples which are going to be used for training the model
+
+		numTrainSamples = int(len(self.trainingData) * trainSplit)
+		
+
+		# Number of samples which are going to be used as validation of the model
+		numValSamples = int(len(self.trainingData) * (1-trainSplit))
+
+
+		(self.trainingData, self.valData) = random_split(self.trainingData,[numTrainSamples, numValSamples],
+							generator= Generator().manual_seed(seed))
 
 
 	def get_traindata(self):
 
 		'''
-			This function returns the training data
+			This function returns the training portion of the training data
 		'''
 		return self.trainingData
 
+
+	def get_valdata(self):
+		'''
+			This function returns the validation part of the training data
+		'''
+		return self.valData
 
 	def get_testdata(self):
 
@@ -125,6 +168,28 @@ class KnasDatasetKmnist:
 		return self.testingData
 
 
+
+	def get_traindata_dataloader(self,batchSize):
+
+		'''
+			This function returns the dataloader of the training data
+		'''
+		return DataLoader(self.trainingData, shuffle=True, batch_size=batchSize)
+
+	def get_valdata_dataloader(self,batchSize):
+
+		'''
+			This function returns the dataloader of the validation data
+		'''
+		return DataLoader(self.valData, shuffle=True, batch_size=batchSize)
+
+
+	def get_testdata_dataloader(self,batchSize):
+
+		'''
+			This function returns the dataloader of the testing data
+		'''
+		return DataLoader(self.testingData, shuffle=True, batch_size=batchSize)
 
 
 

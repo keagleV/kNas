@@ -8,14 +8,14 @@ from torch import flatten
 
 
 
-class LeNet(Module):
+class KNasCNN(Module):
 	'''
 		This class has implemented the convultional layer of the KNAS program
 	'''
 
 	def __init__(self, numChannels, classes):
 		# call the parent constructor
-		super(LeNet, self).__init__()
+		super(KNasCNN, self).__init__()
 		# initialize first set of CONV => RELU => POOL layers
 		self.conv1 = Conv2d(in_channels=numChannels, out_channels=20,
 			kernel_size=(5, 5))

@@ -28,7 +28,21 @@ class KNasConfFile:
 		# Testing Data Root Directory
 		self.testDataRootDirr = '\s*TEST_ROOT_DIR\s*=\s*([^\/]+)(\/([^\/]+))?\s*'
 
+		# Split Seed
+		self.splitSeedr = '\s*SPLIT_SEED\s*=\s*[1-9][0-9]*\s*'
 
+
+
+	def get_splitseed_value(self,definition):
+
+		'''
+			This function will return the split seed value from the definition line
+		'''
+		
+		if match(self.splitSeedr,definition):
+			return definition.split("=")[1].strip()
+
+		return None
 
 
 
@@ -110,6 +124,17 @@ class KNasConfFile:
 		'''
 		
 		if match(self.testDataRootDirr,definition):
+			return definition.split("=")[1].strip()
+
+		return None
+
+	def get_splitseed_value(self,definition):
+
+		'''
+			This function will return the split seed value from the definition line
+		'''
+		
+		if match(self.splitSeedr,definition):
 			return definition.split("=")[1].strip()
 
 		return None

@@ -10,6 +10,12 @@ from re import search
 from knasLogging import KNasLogging
 from knasConfFile import KNasConfFile
 from knasDataset import KnasDatasetKmnist
+from knasCNN import KNasCNN
+from torch import cuda
+from torch.nn import NLLLoss
+import torch
+from torch.optim import Adam
+
 
 
 class KNas:
@@ -94,14 +100,14 @@ class KNas:
 				value= self.confModHand.get_batchSize_value(line)
 
 				if (value): 
-					self.knasParams['BATCH_SIZE']= float(value)
+					self.knasParams['BATCH_SIZE']= int(value)
 					continue
 
 
 				value= self.confModHand.get_epochs_value(line)
 
 				if (value): 
-					self.knasParams['EPOCHS']= float(value)
+					self.knasParams['EPOCHS']= int(value)
 					continue
 
 				value= self.confModHand.get_trainsplit_value(line)
@@ -127,6 +133,13 @@ class KNas:
 					self.knasParams['TEST_ROOT_DIR']=value
 					continue
 
+				value=self.confModHand.get_splitseed_value(line)
+				if value:
+					self.knasParams['SPLIT_SEED']=int(value)
+					continue
+
+
+
 				self.logModHand.knas_log_message(self.logModHand.loggingCodes['CONFIG_FILE_DEF_ERR'],'ERR',lineNum)
 				exit(1)
 
@@ -151,23 +164,155 @@ class KNas:
 		self.datasetHand.load_testdata()
 
 
+		# Splitting the training data set into two groups
+		self.datasetHand.split_training_dataset(self.knasParams['TRAIN_SPLIT'],
+																		self.knasParams['SPLIT_SEED'])
+
+		
+	def knas_run_model(self):
+
+
+		# Setting the device
+		device = self.knasParams["DEVICE"]
+
+
+		# Retrieving the training data
+		trainData = self.datasetHand.get_traindata()
+
+		# Retrieving the training data loader
+		trainDataLoader = self.datasetHand.get_traindata_dataloader(self.knasParams['BATCH_SIZE'])
+
+		# Retrieving the validation data loader
+		valDataLoader = self.datasetHand.get_valdata_dataloader(self.knasParams['BATCH_SIZE'])
+
+
+
+
+		trainSteps = len(trainDataLoader.dataset) // self.knasParams["BATCH_SIZE"]
+		valSteps = len(valDataLoader.dataset) // self.knasParams["BATCH_SIZE"]
 
 
 
 
 
-logModule = KNasLogging()
-datasetModule = KnasDatasetKmnist()
-confModule = KNasConfFile()
 
-knasObj=KNas(logModule,confModule,datasetModule)
+		# Just for informing the user for the availability of the cuda
+		if cuda.is_available() and (device!="cuda"):
+				self.logModHand.knas_log_message(self.logModHand.loggingCodes['CUDA_AVAILABLE'],'INF')
 
-knasObj.knas_argument_parser()
+		# Creating the model
+		model = KNasCNN(numChannels=1, classes=len(trainData.dataset.classes)).to(device)		
+
+		# Optimization
+		opt = Adam(model.parameters(), lr= self.knasParams["INIT_LR"])
+
+		# Loss function
+		lossFn = NLLLoss()
+
+		H = {
+			"train_loss": [],
+			"train_acc": [],
+			"val_loss": [],
+			"val_acc": []
+		}
+
+		for e in range(0, self.knasParams["EPOCHS"]):
+			
+
+			# set the model in training mode
+			model.train()
+			# initialize the total training and validation loss
+			totalTrainLoss = 0
+			totalValLoss = 0
+			# initialize the number of correct predictions in the training
+			# and validation step
+			trainCorrect = 0
+			valCorrect = 0
+			# loop over the training set
+
+			for (x, y) in trainDataLoader:
 
 
-knasObj.knas_parse_conig_file()
+				# send the input to the device
+				(x, y) = (x.to(device), y.to(device))
+				# perform a forward pass and calculate the training loss
+				pred = model(x)
+				loss = lossFn(pred, y)
+				# zero out the gradients, perform the backpropagation step,
+				# and update the weights
+				opt.zero_grad()
+				loss.backward()
+				opt.step()
+				# add the loss to the total training loss so far and
+				# calculate the number of correct predictions
+				totalTrainLoss += loss
+				trainCorrect += (pred.argmax(1) == y).type(
+					torch.float).sum().item()
 
-knasObj.knas_setup_dataset()
 
+		# switch off autograd for evaluation
+			with torch.no_grad():
+
+				# set the model in evaluation mode
+				model.eval()
+				# loop over the validation set
+				for (x, y) in valDataLoader:
+					# send the input to the device
+					(x, y) = (x.to(device), y.to(device))
+					# make the predictions and calculate the validation loss
+					pred = model(x)
+					totalValLoss += lossFn(pred, y)
+					# calculate the number of correct predictions
+					valCorrect += (pred.argmax(1) == y).type(
+						torch.float).sum().item()
+
+			# calculate the average training and validation loss
+			avgTrainLoss = totalTrainLoss / trainSteps
+			avgValLoss = totalValLoss / valSteps
+			# calculate the training and validation accuracy
+			trainCorrect = trainCorrect / len(trainDataLoader.dataset)
+			valCorrect = valCorrect / len(valDataLoader.dataset)
+			# update our training history
+			H["train_loss"].append(avgTrainLoss.cpu().detach().numpy())
+			H["train_acc"].append(trainCorrect)
+			H["val_loss"].append(avgValLoss.cpu().detach().numpy())
+			H["val_acc"].append(valCorrect)
+			# print the model training and validation information
+			print("[INFO] EPOCH: {}/{}".format(e + 1, self.knasParams["EPOCHS"]))
+			print("Train loss: {:.6f}, Train accuracy: {:.4f}".format(
+				avgTrainLoss, trainCorrect))
+			print("Val loss: {:.6f}, Val accuracy: {:.4f}\n".format(
+				avgValLoss, valCorrect))
+
+
+
+
+
+
+if __name__ == "__main__":
+
+	# Creating the logging module for the KNAS
+	logModule = KNasLogging()
+
+	# Creating the dataset module for the KNAS
+	datasetModule = KnasDatasetKmnist()
+
+	# Creating the config file module for the KNAS
+	confModule = KNasConfFile()
+
+	# Creating the KNAS program instance
+	knasObj=KNas(logModule,confModule,datasetModule)
+
+	# Calling the argument reader
+	knasObj.knas_argument_parser()
+
+	# Parsing the configuration file
+	knasObj.knas_parse_conig_file()
+
+	# Setting the dataset up
+	knasObj.knas_setup_dataset()
+
+	# Run the model
+	knasObj.knas_run_model()
 
 

@@ -11,7 +11,9 @@ class KNasLogging:
 
 			'CONFIG_FILE_NOT_SPECIFIED':'Configuration File Not Specified',
 
-			'CONFIG_FILE_DEF_ERR': 'Config File Definition Error'
+			'CONFIG_FILE_DEF_ERR': 'Config File Definition Error',
+
+			'CUDA_AVAILABLE': 'CUDA Is Supported'
 		}
 
 	def knas_log_message(self,message,status,lineNumer=None):
