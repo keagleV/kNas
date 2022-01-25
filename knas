@@ -7,11 +7,11 @@ from argparse import ArgumentParser
 from knasLogging import KNasLogging
 from knasConfFile import KNasConfFile
 from knasDataset import KnasDatasetKmnist
-from knasCNN import KNasCNN
+from knasLN import KNasLayersNet
 
 import torch
 from torch import cuda
-from torch.nn import NLLLoss
+from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from sklearn.metrics import classification_report
 from sklearn.metrics import accuracy_score
@@ -171,8 +171,7 @@ class KNas:
 
 
 		# Splitting the training data set into two groups
-		self.datasetHand.split_training_dataset(self.knasParams['TRAIN_SPLIT'],
-																		self.knasParams['SPLIT_SEED'])
+		self.datasetHand.split_training_dataset(self.knasParams['TRAIN_SPLIT'],self.knasParams['SPLIT_SEED'])
 
 		
 	def knas_create_eval_model(self):
@@ -215,13 +214,13 @@ class KNas:
 				self.logModHand.knas_log_message(self.logModHand.loggingCodes['CUDA_AVAILABLE'],'INF')
 
 		# Creating the model
-		model = KNasCNN(numChannels=1, classes=len(trainData.dataset.classes)).to(device)		
+		model = KNasLayersNet( 1, None , None).to(device)		
 
 		# Optimization
 		opt = Adam(model.parameters(), lr= self.knasParams["INIT_LR"])
 
 		# Loss function
-		lossFn = NLLLoss()
+		lossFn = CrossEntropyLoss()
 
 		# Model performance evaluation parameters
 		modelPerfomanceStatus = {
