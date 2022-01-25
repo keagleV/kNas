@@ -1,0 +1,26 @@
+#!/usr/bin/python3.8
+
+
+
+
+
+
+
+
+class KNas:
+	'''
+		This class has implemented the Neural Architecture Search through using
+		evolutionary methods.
+	'''
+	def __init__(self):
+
+		pass
+
+
+	
+
+
+
+
+
+
