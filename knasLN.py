@@ -7,7 +7,8 @@ from torch.nn import Sigmoid
 from torch.nn import LogSoftmax
 from torch.nn import Sequential
 from torch.nn import Dropout
-
+from torch.nn import Flatten
+from torchsummary import summary
 import torch
 # #??س
 # from torch.nn import BatchNorm1d
@@ -130,7 +131,8 @@ class DFCLayer():
 		'''
 
 		# List of modules to be added to the layer
-		listOfModules = []
+		listOfModules = []	
+
 
 
 		# Number of neurons in the last hidden layer. This will be used
@@ -312,10 +314,13 @@ class KNasLayersNet(Module):
 
 	def forward(self, x):
 
+
 		for cnnLayer in self.cnnLayers:
 			x=cnnLayer(x)
 
+
 		x= x.view(x.size(0),-1)
+
 
 		return self.dfcLayer(x)
 

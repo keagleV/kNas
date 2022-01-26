@@ -7,6 +7,7 @@ from random import randint
 from random import choice
 from random import random
 
+from math import floor
 
 from knasModel import KNasModel
 
@@ -92,15 +93,19 @@ class KNasEAIndividual:
 
 		# Creating CN Layers
 
-		# Last layer output channels
-		lastLayerOutCh=1
+		# One dimenstion of the output size
+		sizeOfOutput = 32
+
+		# Output channesl of the last layer
+		lastLayerOutCh = 1
+
 		for i in range(self.cnLayersCount):
 
 
 
 			# Number of filters in this layer
-			# currLaFilterCnt = choice(self.filterPossValues)
-			currLaFilterCnt = lastLayerOutCh*2
+			currLaFilterCnt = choice(self.filterPossValues)
+			# currLaFilterCnt = lastLayerOutCh*2
 			# Batch norm value
 			batchNorm = choice([randint(1,self.batchNormMaxValue),None])
 
@@ -112,7 +117,19 @@ class KNasEAIndividual:
 			dropout = choice ([random(),None])
 
 			# Maxpool value
-			maxPool = 2
+			maxPool = choice([ 2, None ])
+
+			# In the case of having convultional layer, the output dimentsion would be:
+			# W-F+2p/s + 1
+			sizeOfOutput = ( (sizeOfOutput - 2 + 2)//1 ) +1
+
+
+			# If we have maxpooling , we divide the dimension
+			if maxPool:
+
+				sizeOfOutput = (sizeOfOutput // 2 )
+
+
 
 			self.cnLayersList.append(CNLayer(lastLayerOutCh,currLaFilterCnt,2,1,1,batchNorm,actFunction,dropout,maxPool).create_cn_layer())
 			
@@ -129,7 +146,7 @@ class KNasEAIndividual:
 		numOfHiddenLayers = choice([0,1,2])
 
 		if numOfHiddenLayers==0:
-			self.dfcLayer= DFCLayer( lastLayerOutCh ,10,None,None,None,None,None,None,None,None).create_dfc_layer()
+			self.dfcLayer= DFCLayer( lastLayerOutCh * (sizeOfOutput**2)  ,10,None,None,None,None,None,None,None,None).create_dfc_layer()
 		else:
 
 			# We have to create at least 1 layer until this moment
@@ -147,7 +164,8 @@ class KNasEAIndividual:
 
 			# We only have one hidden layer
 			if numOfHiddenLayers==1:
-				self.dfcLayer= DFCLayer(lastLayerOutCh ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,None,None,None,None).create_dfc_layer()
+
+				self.dfcLayer= DFCLayer(lastLayerOutCh * (sizeOfOutput**2)  ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,None,None,None,None).create_dfc_layer()
 
 			else:
 
@@ -163,7 +181,7 @@ class KNasEAIndividual:
 				# Dropout value
 				secDropout = choice ([random(),None])
 
-				self.dfcLayer= DFCLayer(lastLayerOutCh,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,secNumOfNeurons,secBatchNorm,secActFunction,secDropout).create_dfc_layer()
+				self.dfcLayer= DFCLayer( lastLayerOutCh * (sizeOfOutput**2) ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,secNumOfNeurons,secBatchNorm,secActFunction,secDropout).create_dfc_layer()
 
 	
 

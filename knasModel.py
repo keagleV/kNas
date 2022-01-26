@@ -3,6 +3,7 @@ from knasLN import KNasLayersNet
 
 
 from torch import cuda
+import numpy as np
 
 
 from torch.optim import Adam
@@ -105,7 +106,7 @@ class KNasModel:
 
 		# Creating the model
 		model = KNasLayersNet( 1, cnnLayers , dfcLayer).to(device)		
-
+		model = model.to(device)
 		for la in cnnLayers:
 			print(la)
 
