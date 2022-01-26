@@ -1,17 +1,35 @@
 
+from knasLN import KNasLayersNet
+
+
+from torch import cuda
+
+
+from torch.optim import Adam
+from torch.nn import CrossEntropyLoss
+from sklearn.metrics import accuracy_score
+import torch
+
+from knasModelLogging import KNasModelLogging
+
+
+from time import time
 
 class KNasModel:
 	'''
 		This class has implemented the operations to work with dataset, building and
 		evaluating a model in the KNAS program
 	'''
-	def __init(self,datasetModule,knasParams):
+	def __init__(self,datasetModule,knasParams):
 		
 		# KNas model dataset handler
 		self.datasetHand = datasetModule
 
 		# KNas model parameters
 		self.knasParams = knasParams
+
+		# Model logging handler
+		self.logModHand=KNasModelLogging()
 
 
 
@@ -39,7 +57,8 @@ class KNasModel:
 		self.datasetHand.split_training_dataset(self.knasParams['TRAIN_SPLIT'],self.knasParams['SPLIT_SEED'])
 
 
-	def knas_create_eval_model(self):
+
+	def knas_create_eval_model(self,cnnLayers,dfcLayer,learningRate):
 
 		'''
 			This function will create the model and evaluate it against the 
@@ -85,12 +104,13 @@ class KNasModel:
 
 
 		# Creating the model
-		model = KNasLayersNet( 1, None , None).to(device)		
+		model = KNasLayersNet( 1, cnnLayers , dfcLayer).to(device)		
 
+		for la in cnnLayers:
+			print(la)
 
-
-
-
+		print("--------/////------------")
+		print(dfcLayer)
 
 
 
@@ -104,7 +124,9 @@ class KNasModel:
 
 
 		# Optimization
-		opt = Adam(model.parameters(), lr= self.knasParams["INIT_LR"])
+		opt = Adam(model.parameters(), lr= learningRate )
+
+		print("QWEQWEQWEQWE")
 
 		# Loss function
 		lossFn = CrossEntropyLoss()

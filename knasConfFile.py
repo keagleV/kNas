@@ -8,7 +8,7 @@ class KNasConfFile:
 	def __init__(self):
 
 		# INIT_LR_REGEX
-		self.initLRr = '\s*INIT_LR\s*=\s*([+-]?([0-9]*[.])?[0-9]+)\s*'
+		self.maxCNNLayersr = '\s*MAX_CNN\s*=\s*[1-9][0-9]*\s*'
 
 		# BATCH_SIZE_REGEX
 		self.batchSizer ='\s*BATCH_SIZE\s*=\s*([+-]?([0-9]*[.])?[0-9]+)\s*'
@@ -46,13 +46,13 @@ class KNasConfFile:
 
 
 
-	def get_initlr_value(self,definition):
+	def get_max_cnn_layer_value(self,definition):
 
 		'''
-			This function will return the init lr value from the definition line
+			This function will return the maximum cnn layers value from the definition line
 		'''
 		
-		if match(self.initLRr,definition):
+		if match(self.maxCNNLayersr,definition):
 			return definition.split("=")[1].strip()
 
 		return None

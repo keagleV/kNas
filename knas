@@ -6,23 +6,20 @@ from argparse import ArgumentParser
 
 from knasLogging import KNasLogging
 from knasConfFile import KNasConfFile
+
 from knasDataset import KnasDatasetKmnist
-from knasLN import KNasLayersNet
+
+
 from knasModel import KNasModel
 from knasEA import KNasEA
 
 import torch
-from torch import cuda
-from torch.nn import CrossEntropyLoss
-from torch.optim import Adam
-from sklearn.metrics import classification_report
-from sklearn.metrics import accuracy_score
+
 
 from os import path
 from re import match
 from re import search
 
-from time import time
 import numpy as np
 
 
@@ -31,19 +28,23 @@ class KNas:
 		This class has implemented the Neural Architecture Search through using
 		evolutionary methods.
 	'''
-	def __init__(self,logModule,confModule,datasetModule):
+	def __init__(self):
 
 		# Configuration file path
 		self.confFilePath = str()
 
 		# KNas logging module handler
-		self.logModHand = logModule
+		self.logModHand = KNasLogging()
+
+		# KNas dataset module
+		self.datasetModule = KnasDatasetKmnist()
 
 		# KNas configuration file module handler
-		self.confModHand = confModule
+		self.confModHand = KNasConfFile()
+
 
 		# KNas EA algorithm handler
-		self.eaAlgo = KNasEA(6)
+		self.eaAlgo = None
 
 		# # KNas dataset handler
 		# self.datasetHand = datasetModule
@@ -102,10 +103,10 @@ class KNas:
 					continue
 
 				# TODO inline function return
-				value= self.confModHand.get_initlr_value(line)
+				value= self.confModHand.get_max_cnn_layer_value(line)
 
 				if (value): 
-					self.knasParams['INIT_LR']= float(value)
+					self.knasParams['MAX_CN_LAYERS']= int(value)
 					continue
 
 				value= self.confModHand.get_batchSize_value(line)
@@ -160,6 +161,13 @@ class KNas:
 			This is the main function of the KNAS program. This will start the
 			EA algorithm and use the KNAS model classes to evaluate each individual and so on.
 		'''
+		
+
+
+		# First set the EA algorithm handler
+		self.eaAlgo = KNasEA(self.datasetModule,self.knasParams)
+
+
 		# Initial population of the process
 		population=self.eaAlgo.generate_initial_population()
 
@@ -202,17 +210,10 @@ if __name__ == "__main__":
 
 	#torch.backends.cudnn.enabled = False
 
-	# Creating the logging module for the KNAS
-	logModule = KNasLogging()
-
-	# Creating the dataset module for the KNAS
-	datasetModule = KnasDatasetKmnist()
-
-	# Creating the config file module for the KNAS
-	confModule = KNasConfFile()
+	
 
 	# Creating the KNAS program instance
-	knasObj=KNas(logModule,confModule,datasetModule)
+	knasObj=KNas()
 
 	# Calling the argument reader
 	knasObj.knas_argument_parser()

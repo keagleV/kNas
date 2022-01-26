@@ -66,8 +66,8 @@ class CNLayer():
 							)
 
 		# Check for the batchnorm
-		if self.batchNorm!=None:
-			listOfModules.append(BatchNorm2d(self.batchNorm))
+		# if self.batchNorm!=None:
+		# 	listOfModules.append(BatchNorm2d(self.batchNorm))
 
 		# Check for the activation function
 
@@ -85,7 +85,7 @@ class CNLayer():
 
 
 		if self.maxPoolKernelSize!=None:
-			listOfModules.append(MaxPool2d(kernel_size=self.maxPoolKernelSize))
+			listOfModules.append(MaxPool2d(kernel_size=(self.maxPoolKernelSize,self.maxPoolKernelSize)))
 
 		# Returning the sequence of the modules in the layer
 		return Sequential(*listOfModules)
@@ -129,7 +129,6 @@ class DFCLayer():
 			the constructor of the class
 		'''
 
-
 		# List of modules to be added to the layer
 		listOfModules = []
 
@@ -149,8 +148,8 @@ class DFCLayer():
 			listOfModules.append(Linear(self.in_channels,self.fhiNeurons))
 
 			# Check for the batch norm
-			if self.fhiBatchNorm!=None:
-				listOfModules.append(BatchNorm2d(self.fhiBatchNorm))
+			# if self.fhiBatchNorm!=None:
+			# 	listOfModules.append(BatchNorm2d(self.fhiBatchNorm))
 
 			# Check for the activation function
 			if self.fhiActivationFunc!=None:
@@ -176,8 +175,8 @@ class DFCLayer():
 				listOfModules.append(Linear(self.fhiNeurons,self.secNeurons))
 
 				# Check for the batch norm
-				if self.secBatchNorm!=None:
-					listOfModules.append(BatchNorm2d(self.secBatchNorm))
+				# if self.secBatchNorm!=None:
+				# 	listOfModules.append(BatchNorm2d(self.secBatchNorm))
 
 				# Check for the activation function
 				if self.secActivationFunc!=None:
@@ -207,8 +206,6 @@ class DFCLayer():
 		return Sequential(*listOfModules)
 
 
-
-
 class KNasLayersNet(Module):
 	'''
 		This class has implemented the convultional layer of the KNAS program
@@ -222,6 +219,10 @@ class KNasLayersNet(Module):
 		self.cnnLayers=cnnLayers
 
 		self.dfcLayer=dfcLayer
+
+		# print("HEr")
+		# print(cnnLayers)
+		# print(dfcLayer)
 
 
 
@@ -358,6 +359,9 @@ class KNasLayersNet(Module):
 		# output = self.logSoftmax(x)
 		# # return the output predictions
 		# return output
+
+
+
 
 # in_channels,out_channels,
 #kernel_size,stride,padding,batchNorm,

@@ -8,6 +8,10 @@ from random import choice
 from random import random
 
 
+from knasModel import KNasModel
+
+
+
 class KNasEALogging():
 	'''
 		This class has implemented the logging operations for the EA
@@ -74,10 +78,13 @@ class KNasEAIndividual:
 		self.create_random_individual(maxCNLayers)
 
 
+
 	def create_random_individual(self,maxCNLayers):
 		'''
 			This function creates a random indivi
 		'''
+
+		
 
 		# Decide on number of the CN layers
 		self.cnLayersCount = randint(1,maxCNLayers)
@@ -89,9 +96,11 @@ class KNasEAIndividual:
 		lastLayerOutCh=1
 		for i in range(self.cnLayersCount):
 
-			# Number of filters in this layer
-			currLaFilterCnt = choice(self.filterPossValues)
 
+
+			# Number of filters in this layer
+			# currLaFilterCnt = choice(self.filterPossValues)
+			currLaFilterCnt = lastLayerOutCh*2
 			# Batch norm value
 			batchNorm = choice([randint(1,self.batchNormMaxValue),None])
 
@@ -103,8 +112,7 @@ class KNasEAIndividual:
 			dropout = choice ([random(),None])
 
 			# Maxpool value
-			maxPool = choice([random(),None])
-
+			maxPool = 2
 
 			self.cnLayersList.append(CNLayer(lastLayerOutCh,currLaFilterCnt,2,1,1,batchNorm,actFunction,dropout,maxPool).create_cn_layer())
 			
@@ -115,11 +123,13 @@ class KNasEAIndividual:
 		# Creating DFC layer
 		#TODO
 
+
+
 		# First define number of the hidden layers
 		numOfHiddenLayers = choice([0,1,2])
 
 		if numOfHiddenLayers==0:
-			self.dfcLayer= DFCLayer(64*4*4,10,None,None,None,None,None,None,None,None).create_dfc_layer()
+			self.dfcLayer= DFCLayer( lastLayerOutCh ,10,None,None,None,None,None,None,None,None).create_dfc_layer()
 		else:
 
 			# We have to create at least 1 layer until this moment
@@ -137,7 +147,7 @@ class KNasEAIndividual:
 
 			# We only have one hidden layer
 			if numOfHiddenLayers==1:
-				self.dfcLayer= DFCLayer(64*4*4,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,None,None,None,None).create_dfc_layer()
+				self.dfcLayer= DFCLayer(lastLayerOutCh ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,None,None,None,None).create_dfc_layer()
 
 			else:
 
@@ -153,7 +163,7 @@ class KNasEAIndividual:
 				# Dropout value
 				secDropout = choice ([random(),None])
 
-				self.dfcLayer= DFCLayer(64*4*4,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,secNumOfNeurons,secBatchNorm,secActFunction,secDropout).create_dfc_layer()
+				self.dfcLayer= DFCLayer(lastLayerOutCh,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,secNumOfNeurons,secBatchNorm,secActFunction,secDropout).create_dfc_layer()
 
 	
 
@@ -171,23 +181,30 @@ class KNasEA:
 		developing the KNAS program
 	'''
 
-	def __init__(self,maxCNLayers,popSize=10,genNum=20):
+	def __init__(self,datasetModule,knasParams):
 
 		# Population size
-		self.popSize=popSize
+		self.popSize=10
 
 		# Number of generations
-		self.genNum=genNum
+		self.genNum=20
 
 		# Maximum number of CN layers in an individual
-		self.maxCNLayers=maxCNLayers
+		self.maxCNLayers=knasParams['MAX_CN_LAYERS']
 
 
 		# Logging module handler
 		self.logModHand= KNasEALogging()
 
+		# KNas model handler
+		self.knasModelHand = KNasModel(datasetModule,knasParams)
 
+		
+		# Calling the dataset set up function
+		self.knasModelHand.knas_setup_dataset()
+		
 
+		
 
 
 
@@ -205,7 +222,17 @@ class KNasEA:
 			population.append(KNasEAIndividual(self.maxCNLayers))
 
 
+		# for po in population:
+		# 	print(po.cnLayersList)
+		# 	print("--------")
+		# 	print(po.dfcLayer)
+
+		# 	print("XXXXXXXXXXXXXXXXXXX")
+
 		return population
+
+
+
 
 
 	def calculate_fitness(self,population):
@@ -214,8 +241,12 @@ class KNasEA:
 			This function will calculate the fitness value of the individuals
 			in the population
 		'''
-		pass
+		for ind in population:
 
+			performanceStatus = self.knasModelHand.knas_create_eval_model(ind.cnLayersList,ind.dfcLayer,0.2)
+
+
+			# Updating the individuals
 
 
 
