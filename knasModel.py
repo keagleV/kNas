@@ -10,7 +10,7 @@ from torch import cuda
 from torch.optim import Adam
 from torch.nn import CrossEntropyLoss
 from torch import cuda
-
+from torch import no_grad
 
 
 
@@ -184,7 +184,7 @@ class KNasModel:
 
 
 			# Finding the performance parameters on the validation data
-			with torch.no_grad():
+			with no_grad():
 				
 				# Setting the model in evaluation mode
 				model.eval()
@@ -235,7 +235,7 @@ class KNasModel:
 			# Total loss value of the testing phase
 			testTotalValLoss=0
 
-			with torch.no_grad():
+			with no_grad():
 
 
 				# Setting the model in evaluation mode
@@ -258,7 +258,7 @@ class KNasModel:
 
 				
 
-				modelPerfomanceStatus["test_acc"].append(testCorrect)
+				modelPerfomanceStatus["test_acc"].append(testCorrect/len(testDataLoader.dataset))
 
 				modelPerfomanceStatus["test_loss"].append((testTotalValLoss / testSteps).to(device).detach().item())
 

@@ -45,6 +45,9 @@ class KNasEAIndividual:
 		# Fitness value of the individual
 		self.fitnessVal=int()
 
+		# Number of learnable parameters of this individual
+		self.numLearnParams = int()
+
 		# Number of CN layers in the first part of the network
 		self.cnLayersCount=int()
 
@@ -105,27 +108,50 @@ class KNasEAIndividual:
 			# Number of filters in this layer
 			currLaFilterCnt = choice(self.filterPossValues)
 
+			# In the case of having convultional layer, 
+			# the output dimentsion would be:
+			#
+			# 						(W-F+2p)/s + 1
+			# W: dim size
+			# F: kernel size
+			# P: padding
+			# S: stride
+			#
+			#
+			self.inputDimension = ( (self.inputDimension - 2 + 2)//1 ) +1
+
+
+
 			# Batch norm value
 			batchNorm = choice([randint(1,self.batchNormMaxValue),None])
 
+			if batchNorm:
+				self.numLearnParams+=1
+
 			# Activation function value
 			actFunction= choice([ *self.actFuncPossValues , None ])
-
+			
+			if actFunction:
+				self.numLearnParams+=1
+			
 
 			# Dropout value
 			dropout = choice ([random(),None])
 
+			if dropout:
+				self.numLearnParams +=1
+
+
 			# Maxpool value
 			maxPool = choice([ 2, None ])
 
-			# In the case of having convultional layer, the output dimentsion would be:
-			# W-F+2p/s + 1
-			self.inputDimension = ( (self.inputDimension - 2 + 2)//1 ) +1
-
+			
 
 			# If we have maxpooling , we divide the dimension
 			if maxPool:
-
+				# Increment learnable parameters
+				self.numLearnParams+=1
+				
 				self.inputDimension = (self.inputDimension // 2 )
 
 
@@ -150,20 +176,34 @@ class KNasEAIndividual:
 
 			# We have to create at least 1 layer until this moment
 
+
 			fhNumOfNeurons = choice(self.dfcHiLaPossNeuronValues)
+
+			# Increment learnable params for the number of first hidden layer neurons
+			self.numLearnParams+=1
+
 
 			# Batch norm value
 			fhBatchNorm = choice([randint(1,self.batchNormMaxValue),None])
 
+			if fhBatchNorm:
+				self.numLearnParams+=1
+			
 			# Activation function value
-			fhActFunction= choice(self.actFuncPossValues)
+			fhActFunction= choice([ *self.actFuncPossValues,None])
+			
+			if fhActFunction:
+				self.numLearnParams+=1
 
+			
 			# Dropout value
 			fhDropout = choice ([random(),None])
 
+			if fhDropout:
+				self.numLearnParams+=1
+
 			# We only have one hidden layer
 			if numOfHiddenLayers==1:
-
 				self.dfcLayer= DFCLayer(lastLayerOutCh * (self.inputDimension**2)  ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,None,None,None,None).create_dfc_layer().to(self.device)
 
 			else:
@@ -171,14 +211,29 @@ class KNasEAIndividual:
 				# Creating parameters for the second layer
 				secNumOfNeurons = choice(self.dfcHiLaPossNeuronValues)
 
+				# Increment learnable params for the number of first hidden layer neurons
+				self.numLearnParams+=1
+
 				# Batch norm value
 				secBatchNorm = choice([randint(1,self.batchNormMaxValue),None])
 
+				if secBatchNorm:
+					self.numLearnParams+=1
+
+
 				# Activation function value
-				secActFunction= choice(self.actFuncPossValues)
+				secActFunction= choice([*self.actFuncPossValues,None])
+
+				if secActFunction:
+					self.numLearnParams+=1
+
 
 				# Dropout value
 				secDropout = choice ([random(),None])
+
+				if secDropout:
+					self.numLearnParams+=1
+
 
 				# Creating the dfc layer
 				self.dfcLayer= DFCLayer( lastLayerOutCh * (self.inputDimension**2) ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,secNumOfNeurons,secBatchNorm,secActFunction,secDropout).create_dfc_layer().to(self.device)
@@ -254,7 +309,13 @@ class KNasEA:
 
 			performanceStatus = self.knasModelHand.knas_create_eval_model(ind.cnLayersList,ind.dfcLayer,ind.learningRate)
 
+			# Calcualting the fitness value based on the performance status
+			
 
+			print("HI")
+			print(performanceStatus)
+			print(ind.numLearnParams)
+			exit(0)
 			# Updating the individuals
 
 
