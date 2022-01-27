@@ -8,6 +8,8 @@ from knasEA import KNasEA
 
 from argparse import ArgumentParser
 
+from random import choices
+
 from os import path
 
 
@@ -153,30 +155,72 @@ class KNas:
 
 
 		# Initial population of the process
-		population=self.eaAlgo.generate_initial_population()
+		population=self.eaAlgo.knasea_generate_initial_population()
 
+
+		# Population size
+		popSize = len(population)
+
+		# Evaluating the initial population
+		population = self.eaAlgo.knasea_calculate_fitness(population)
 
 
 
 		# Generation count for this evaluation is the termination condition
 
 		for i in range(self.eaAlgo.genNum):
+
+			print("GEN: ",i)
 			
-			# Evaluation process
 
-			population = self.eaAlgo.calculate_fitness(population)
+			'''
+				Selection
+			'''
 
-
-			# Selection
-
-
-			# Crossover
+			# Choose two individuals randomly from the population
+			ind1 , ind2 = tuple(choices(population,k=2))
 
 
-			# Mutation
+			'''
+				Crossover
+			'''
+			off1, off2 = self.eaAlgo.knasea_crossover(ind1,ind2)
 
 
-	
+
+			'''
+				Mutation
+			'''
+			off1, off2 = self.eaAlgo.knasea_crossover(off1,off2)
+
+			
+			# Evaluating the offsprings as members of a short time population
+			offsPopulation = self.eaAlgo.knasea_calculate_fitness([off1,off2])
+
+
+			# Add offsprings to the population
+			population+= offsPopulation
+
+
+
+			'''
+				Surivivol selection
+			'''
+
+			# Sorting the population based on the fitness value first, and then
+			# select the population size individuals from the population
+			population = sorted(population,key=lambda ind: ind.fitnessVal)[:popSize]
+
+
+
+		# EA algorithm finished, the first individual is the one with
+		# the highest fitness value
+		
+
+
+
+
+
 
 
 
@@ -203,10 +247,5 @@ if __name__ == "__main__":
 
 	# Starting the evaluation process
 	knasObj.start_evaluation()
-	# # Setting the dataset up
-	# knasObj.knas_setup_dataset()
-
-	# # Run the model
-	# knasObj.knas_create_eval_model()
-
-
+	
+	

@@ -230,6 +230,12 @@ class KNasEA:
 		# Number of generations
 		self.genNum=20
 
+		# Crossover probability
+		self.crossProb= 0.4
+
+		# Mutation probability
+		self.mutProb = 0.1
+
 		# Device to be used
 		self.device = knasParams["DEVICE"]
 
@@ -251,7 +257,7 @@ class KNasEA:
 
 
 
-	def generate_initial_population(self):
+	def knasea_generate_initial_population(self):
 		'''
 			This function generates the initial population
 		'''
@@ -270,7 +276,7 @@ class KNasEA:
 
 
 
-	def calculate_fitness(self,population):
+	def knasea_calculate_fitness(self,population):
 
 		'''
 			This function will calculate the fitness value of the individuals
@@ -286,8 +292,30 @@ class KNasEA:
 			print("HI")
 			print(performanceStatus)
 			print(ind.numLearnParams)
-			exit(0)
+
+			ind.fitnessVal=randint(1,100)
+
 			# Updating the individuals
+
+
+		return population
+
+	def knasea_crossover(self,ind1 , ind2 ):
+		'''
+			This function will perform the crossover method on two 
+			individuals selected from the population
+		'''
+
+		return ind1,ind2
+	
+	
+	def knasea_mutation(self,ind1 , ind2 ):
+		'''
+			This function will perform the mutation method on two 
+			offsprings created from the crossover phase
+		'''
+
+		return ind1,ind2
 
 
 
