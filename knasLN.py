@@ -53,6 +53,8 @@ class CNLayer():
 		# List of modules to be added to the layer
 		listOfModules = []
 
+		# Number of learnable parameters
+		numLearnParams=0
 
 		# Adding the first component which is convolutional filters
 		listOfModules.append(Conv2d(in_channels=self.in_channels, 
@@ -64,28 +66,40 @@ class CNLayer():
 
 		# Check for the batchnorm
 		# if self.batchNorm!=None:
+		#	numLearnParams+=1
 		# 	listOfModules.append(BatchNorm2d(self.batchNorm))
 
 		# Check for the activation function
 
 		if self.activationFunc:
+
+			numLearnParams+=1
+			#TODO check for sth other than relu, sigmoid
+
 			if self.activationFunc == "relu":
 				listOfModules.append(ReLU())
 
 			elif self.activationFunc == "sigmoid":
 				listOfModules.append(Sigmoid())
 
+
 		# Check for the dropout
 		if self.dropoutProb:
+
+			numLearnParams+=1
+
 			# Adding the droupout
 			listOfModules.append(Dropout(self.dropoutProb))
 
 
 		if self.maxPoolKernelSize:
+
+			numLearnParams+=1
+
 			listOfModules.append(MaxPool2d(kernel_size=(self.maxPoolKernelSize,self.maxPoolKernelSize)))
 
 		# Returning the sequence of the modules in the layer
-		return Sequential(*listOfModules)
+		return (numLearnParams, Sequential(*listOfModules))
 
 
 class DFCLayer():
@@ -128,7 +142,10 @@ class DFCLayer():
 
 		# List of modules to be added to the layer
 		listOfModules = []	
+	
 
+		# Number of learnable parameters
+		numLearnParams=0
 
 
 		# Number of neurons in the last hidden layer. This will be used
@@ -140,17 +157,27 @@ class DFCLayer():
 
 		if self.fhiNeurons:
 
+
 			# Set the last layer neuron count
 			lastHiddenLayerNeurons = self.fhiNeurons
+
+			# Incrementing the learning parameters counter for number of 
+			# neurons in the first hidden layer
+			numLearnParams+=1
+
 
 			listOfModules.append(Linear(self.in_channels,self.fhiNeurons))
 
 			# Check for the batch norm
 			# if self.fhiBatchNorm!=None:
+			#	numLearnParams+=1
 			# 	listOfModules.append(BatchNorm2d(self.fhiBatchNorm))
 
 			# Check for the activation function
 			if self.fhiActivationFunc:
+
+				numLearnParams+=1
+
 				if self.fhiActivationFunc == "relu":
 					listOfModules.append(ReLU())
 
@@ -159,6 +186,9 @@ class DFCLayer():
 
 			# Check for the dropout
 			if self.fhiDropoutProb:
+
+				numLearnParams+=1
+
 				# Adding the droupout
 				listOfModules.append(Dropout(self.fhiDropoutProb))
 
@@ -170,14 +200,23 @@ class DFCLayer():
 				# Set the last layer neuron count
 				lastHiddenLayerNeurons = self.secNeurons
 
+
+				# Incrementing the learning parameters counter for number of 
+				# neurons in the second hidden layer
+				numLearnParams+=1
+
 				listOfModules.append(Linear(self.fhiNeurons,self.secNeurons))
 
 				# Check for the batch norm
 				# if self.secBatchNorm!=None:
+				#	numLearnParams+=1
 				# 	listOfModules.append(BatchNorm2d(self.secBatchNorm))
 
 				# Check for the activation function
 				if self.secActivationFunc:
+
+					numLearnParams+=1
+
 					if self.secActivationFunc == "relu":
 						listOfModules.append(ReLU())
 
@@ -186,6 +225,9 @@ class DFCLayer():
 
 				# Check for the dropout
 				if self.secDropoutProb:
+
+					numLearnParams+=1
+
 					# Adding the droupout
 					listOfModules.append(Dropout(self.secDropoutProb))
 
@@ -201,7 +243,7 @@ class DFCLayer():
 
 
 		# Returning the sequence of the modules in the layer
-		return Sequential(*listOfModules)
+		return (numLearnParams,Sequential(*listOfModules))
 
 
 class KNasLayersNet(Module):
