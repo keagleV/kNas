@@ -162,8 +162,6 @@ class KNas:
 
 		for i in range(self.eaAlgo.genNum):
 			
-			print(i)
-
 			# Evaluation process
 
 			population = self.eaAlgo.calculate_fitness(population)
@@ -193,9 +191,6 @@ class KNas:
 if __name__ == "__main__":
 
 
-	#torch.backends.cudnn.enabled = False
-
-	
 
 	# Creating the KNAS program instance
 	knasObj=KNas()

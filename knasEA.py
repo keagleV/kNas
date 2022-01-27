@@ -70,10 +70,7 @@ class KNasEAIndividual:
 		self.batchNormMaxValue = 100
 
 		# Possible values for the activation function
-		self.actFuncPossValues = ['relu','sigmoid',None]
-
-		# Possible values for the activation function
-		self.actFuncPossValues = ['relu','sigmoid',None]
+		self.actFuncPossValues = ['relu','sigmoid']
 
 		# Possible values for the dfc hidden layer neurons
 		self.dfcHiLaPossNeuronValues = [ 2, 4 , 8, 16, 32, 64, 128 , 256 , 512 ]
@@ -107,12 +104,12 @@ class KNasEAIndividual:
 
 			# Number of filters in this layer
 			currLaFilterCnt = choice(self.filterPossValues)
-			# currLaFilterCnt = lastLayerOutCh*2
+
 			# Batch norm value
 			batchNorm = choice([randint(1,self.batchNormMaxValue),None])
 
 			# Activation function value
-			actFunction= choice(self.actFuncPossValues)
+			actFunction= choice([ *self.actFuncPossValues , None ])
 
 
 			# Dropout value

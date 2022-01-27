@@ -68,7 +68,7 @@ class CNLayer():
 
 		# Check for the activation function
 
-		if self.activationFunc!=None:
+		if self.activationFunc:
 			if self.activationFunc == "relu":
 				listOfModules.append(ReLU())
 
@@ -76,12 +76,12 @@ class CNLayer():
 				listOfModules.append(Sigmoid())
 
 		# Check for the dropout
-		if self.dropoutProb!=None:
+		if self.dropoutProb:
 			# Adding the droupout
 			listOfModules.append(Dropout(self.dropoutProb))
 
 
-		if self.maxPoolKernelSize!=None:
+		if self.maxPoolKernelSize:
 			listOfModules.append(MaxPool2d(kernel_size=(self.maxPoolKernelSize,self.maxPoolKernelSize)))
 
 		# Returning the sequence of the modules in the layer
@@ -138,7 +138,7 @@ class DFCLayer():
 
 		# Checking for the first hidden layer neurons
 
-		if self.fhiNeurons!=None:
+		if self.fhiNeurons:
 
 			# Set the last layer neuron count
 			lastHiddenLayerNeurons = self.fhiNeurons
@@ -150,7 +150,7 @@ class DFCLayer():
 			# 	listOfModules.append(BatchNorm2d(self.fhiBatchNorm))
 
 			# Check for the activation function
-			if self.fhiActivationFunc!=None:
+			if self.fhiActivationFunc:
 				if self.fhiActivationFunc == "relu":
 					listOfModules.append(ReLU())
 
@@ -158,14 +158,14 @@ class DFCLayer():
 					listOfModules.append(Sigmoid())
 
 			# Check for the dropout
-			if self.fhiDropoutProb!=None:
+			if self.fhiDropoutProb:
 				# Adding the droupout
 				listOfModules.append(Dropout(self.fhiDropoutProb))
 
 
 			# Checking the second hidden layer
 
-			if self.secNeurons!=None:
+			if self.secNeurons:
 
 				# Set the last layer neuron count
 				lastHiddenLayerNeurons = self.secNeurons
@@ -177,7 +177,7 @@ class DFCLayer():
 				# 	listOfModules.append(BatchNorm2d(self.secBatchNorm))
 
 				# Check for the activation function
-				if self.secActivationFunc!=None:
+				if self.secActivationFunc:
 					if self.secActivationFunc == "relu":
 						listOfModules.append(ReLU())
 
@@ -185,7 +185,7 @@ class DFCLayer():
 						listOfModules.append(Sigmoid())
 
 				# Check for the dropout
-				if self.secDropoutProb!=None:
+				if self.secDropoutProb:
 					# Adding the droupout
 					listOfModules.append(Dropout(self.secDropoutProb))
 
