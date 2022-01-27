@@ -1,7 +1,6 @@
-
-
 from knasLN import CNLayer
 from knasLN import DFCLayer
+from knasModel import KNasModel
 
 from random import randint
 from random import choice
@@ -9,7 +8,6 @@ from random import random
 
 from math import floor
 
-from knasModel import KNasModel
 
 
 
@@ -25,7 +23,6 @@ class KNasEALogging():
 			'INIT_POPULATION_GEN':'Generating The Initial Population',
 
 		
-
 		}
 
 	def knasea_log_message(self,message,status,lineNumer=None):
@@ -43,7 +40,7 @@ class KNasEAIndividual:
 	'''
 		This class has implemented the individual solutions of the EA algorithm
 	'''
-	def __init__(self,maxCNLayers):
+	def __init__(self,maxCNLayers,device):
 
 		# Fitness value of the individual
 		self.fitnessVal=int()
@@ -57,8 +54,14 @@ class KNasEAIndividual:
 		# DFC layer, the only layer in the last part of the network
 		self.dfcLayer=None
 
+		# Device to be used to create the layers of this individual
+		self.device=device
+
 		# Learning rate
 		self.learningRate = float()
+
+		# Input dimenesion: 1 * dim * dim 
+		self.inputDimension = 32
 
 		# Possible values for the filter count
 		self.filterPossValues = [ 2, 4 , 8, 16, 32, 64, 128 ]
@@ -85,6 +88,8 @@ class KNasEAIndividual:
 			This function creates a random indivi
 		'''
 
+		# Setting the leraning rate
+		self.learningRate=random()
 		
 
 		# Decide on number of the CN layers
@@ -92,9 +97,6 @@ class KNasEAIndividual:
 
 
 		# Creating CN Layers
-
-		# One dimenstion of the output size
-		sizeOfOutput = 32
 
 		# Output channesl of the last layer
 		lastLayerOutCh = 1
@@ -121,32 +123,32 @@ class KNasEAIndividual:
 
 			# In the case of having convultional layer, the output dimentsion would be:
 			# W-F+2p/s + 1
-			sizeOfOutput = ( (sizeOfOutput - 2 + 2)//1 ) +1
+			self.inputDimension = ( (self.inputDimension - 2 + 2)//1 ) +1
 
 
 			# If we have maxpooling , we divide the dimension
 			if maxPool:
 
-				sizeOfOutput = (sizeOfOutput // 2 )
+				self.inputDimension = (self.inputDimension // 2 )
 
 
-
-			self.cnLayersList.append(CNLayer(lastLayerOutCh,currLaFilterCnt,2,1,1,batchNorm,actFunction,dropout,maxPool).create_cn_layer())
+			# Adding a new CN layer to the previous layers
+			self.cnLayersList.append(CNLayer(lastLayerOutCh,currLaFilterCnt,2,1,1,batchNorm,actFunction,dropout,maxPool).create_cn_layer().to(self.device))
 			
 			# Updating the last layer output channel
 			lastLayerOutCh = currLaFilterCnt
 			
 
+
+
 		# Creating DFC layer
-		#TODO
-
-
 
 		# First define number of the hidden layers
 		numOfHiddenLayers = choice([0,1,2])
 
+
 		if numOfHiddenLayers==0:
-			self.dfcLayer= DFCLayer( lastLayerOutCh * (sizeOfOutput**2)  ,10,None,None,None,None,None,None,None,None).create_dfc_layer()
+			self.dfcLayer= DFCLayer( lastLayerOutCh * (self.inputDimension**2)  ,10,None,None,None,None,None,None,None,None).create_dfc_layer().to(self.device)
 		else:
 
 			# We have to create at least 1 layer until this moment
@@ -165,7 +167,7 @@ class KNasEAIndividual:
 			# We only have one hidden layer
 			if numOfHiddenLayers==1:
 
-				self.dfcLayer= DFCLayer(lastLayerOutCh * (sizeOfOutput**2)  ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,None,None,None,None).create_dfc_layer()
+				self.dfcLayer= DFCLayer(lastLayerOutCh * (self.inputDimension**2)  ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,None,None,None,None).create_dfc_layer().to(self.device)
 
 			else:
 
@@ -181,16 +183,10 @@ class KNasEAIndividual:
 				# Dropout value
 				secDropout = choice ([random(),None])
 
-				self.dfcLayer= DFCLayer( lastLayerOutCh * (sizeOfOutput**2) ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,secNumOfNeurons,secBatchNorm,secActFunction,secDropout).create_dfc_layer()
+				# Creating the dfc layer
+				self.dfcLayer= DFCLayer( lastLayerOutCh * (self.inputDimension**2) ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,secNumOfNeurons,secBatchNorm,secActFunction,secDropout).create_dfc_layer().to(self.device)
 
 	
-
-
-
-
-
-
-
 
 class KNasEA:
 
@@ -206,6 +202,11 @@ class KNasEA:
 
 		# Number of generations
 		self.genNum=20
+
+
+		# Device to be used
+		self.device = knasParams["DEVICE"]
+
 
 		# Maximum number of CN layers in an individual
 		self.maxCNLayers=knasParams['MAX_CN_LAYERS']
@@ -237,15 +238,8 @@ class KNasEA:
 		population=list()
 
 		for i in range(self.popSize):
-			population.append(KNasEAIndividual(self.maxCNLayers))
+			population.append(KNasEAIndividual(self.maxCNLayers,self.device))
 
-
-		# for po in population:
-		# 	print(po.cnLayersList)
-		# 	print("--------")
-		# 	print(po.dfcLayer)
-
-		# 	print("XXXXXXXXXXXXXXXXXXX")
 
 		return population
 
@@ -261,27 +255,11 @@ class KNasEA:
 		'''
 		for ind in population:
 
-			performanceStatus = self.knasModelHand.knas_create_eval_model(ind.cnLayersList,ind.dfcLayer,0.2)
+			performanceStatus = self.knasModelHand.knas_create_eval_model(ind.cnLayersList,ind.dfcLayer,ind.learningRate)
 
 
 			# Updating the individuals
 
-
-
-
-
-
-# obj=KNasEA(maxCNLayers=6)
-# obj.generate_initial_population()
-
-
-# obj=KNasEAIndividual(6)
-
-# for la in obj.cnLayersList:
-# 	print(la)
-# # print(obj.cnLayersList)
-# print("XXXXXXXX")
-# print(obj.dfcLayer)
 
 
 

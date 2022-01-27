@@ -1,26 +1,14 @@
 #!/usr/bin/python3.9
 
-
-
-from argparse import ArgumentParser
-
 from knasLogging import KNasLogging
 from knasConfFile import KNasConfFile
-
 from knasDataset import KnasDatasetKmnist
-
-
 from knasModel import KNasModel
 from knasEA import KNasEA
 
-import torch
-
+from argparse import ArgumentParser
 
 from os import path
-from re import match
-from re import search
-
-import numpy as np
 
 
 class KNas:
@@ -42,12 +30,8 @@ class KNas:
 		# KNas configuration file module handler
 		self.confModHand = KNasConfFile()
 
-
 		# KNas EA algorithm handler
 		self.eaAlgo = None
-
-		# # KNas dataset handler
-		# self.datasetHand = datasetModule
 
 		# KNas parameters
 		self.knasParams=dict()
@@ -177,6 +161,7 @@ class KNas:
 		# Generation count for this evaluation is the termination condition
 
 		for i in range(self.eaAlgo.genNum):
+			
 			print(i)
 
 			# Evaluation process

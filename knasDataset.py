@@ -4,9 +4,9 @@ from torchvision.transforms import transforms
 from torch.utils.data import random_split
 from torch.utils.data import DataLoader
 from torch import Generator
+from torch import cuda
 
 from os import path
-
 
 
 
@@ -105,8 +105,6 @@ class KnasDatasetKmnist:
 
 		self.trainingData = KMNIST(root= self.trainDataRoot , train=True, download=True,transform=self.DatasetTransforms)
 
-			#TODO check return value
-
 		
 	def load_testdata(self):
 
@@ -173,14 +171,14 @@ class KnasDatasetKmnist:
 		'''
 			This function returns the dataloader of the training data
 		'''
-		return DataLoader(self.trainingData, shuffle=True, batch_size=batchSize)
+		return DataLoader(self.trainingData,shuffle=False, num_workers=0, pin_memory=cuda.is_available(), batch_size=batchSize)
 
 	def get_valdata_dataloader(self,batchSize):
 
 		'''
 			This function returns the dataloader of the validation data
 		'''
-		return DataLoader(self.valData, shuffle=True, batch_size=batchSize)
+		return DataLoader(self.valData,shuffle=False, num_workers=0, pin_memory=cuda.is_available(), batch_size=batchSize)
 
 
 	def get_testdata_dataloader(self,batchSize):
@@ -188,7 +186,7 @@ class KnasDatasetKmnist:
 		'''
 			This function returns the dataloader of the testing data
 		'''
-		return DataLoader(self.testingData, shuffle=True, batch_size=batchSize)
+		return DataLoader(self.testingData, batch_size=batchSize,shuffle=False, num_workers=0, pin_memory=cuda.is_available())
 
 
 

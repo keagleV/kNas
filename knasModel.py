@@ -1,20 +1,19 @@
 
+from time import time
+
 from knasLN import KNasLayersNet
-
-
-from torch import cuda
-import numpy as np
-
-
-from torch.optim import Adam
-from torch.nn import CrossEntropyLoss
-from sklearn.metrics import accuracy_score
-import torch
-
 from knasModelLogging import KNasModelLogging
 
 
-from time import time
+from torch import float as tfloat
+from torch import cuda
+from torch.optim import Adam
+from torch.nn import CrossEntropyLoss
+from torch import cuda
+
+
+
+
 
 class KNasModel:
 	'''
@@ -88,7 +87,7 @@ class KNasModel:
 		# Retrieving the test data loader
 		testDataLoader= self.datasetHand.get_testdata_dataloader(self.knasParams['BATCH_SIZE'])
 
-
+		# Calculating the train, val, and test steps based on the batch size
 		trainSteps = len(trainDataLoader.dataset) // self.knasParams["BATCH_SIZE"]
 		valSteps = len(valDataLoader.dataset) // self.knasParams["BATCH_SIZE"]
 		testSteps = len(testDataLoader.dataset) // self.knasParams["BATCH_SIZE"]
@@ -99,14 +98,11 @@ class KNasModel:
 				self.logModHand.knas_log_message(self.logModHand.loggingCodes['CUDA_AVAILABLE'],'INF')
 
 
-
-
-
-
-
 		# Creating the model
 		model = KNasLayersNet( 1, cnnLayers , dfcLayer).to(device)		
-		model = model.to(device)
+
+		
+		# For DEBUG
 		for la in cnnLayers:
 			print(la)
 
@@ -115,22 +111,13 @@ class KNasModel:
 
 
 
-
-
-
-
-
-
-
-
-
 		# Optimization
 		opt = Adam(model.parameters(), lr= learningRate )
 
-		print("QWEQWEQWEQWE")
 
 		# Loss function
 		lossFn = CrossEntropyLoss()
+		
 
 		# Model performance evaluation parameters
 		modelPerfomanceStatus = {
@@ -146,6 +133,7 @@ class KNasModel:
 
 		self.logModHand.knas_log_message(self.logModHand.loggingCodes['MODEL_TRAINING_STARTED'],'INF')
 
+		# Setting the start time
 		startTime=time()
 
 		for e in range(0, self.knasParams["EPOCHS"]):
@@ -153,62 +141,73 @@ class KNasModel:
 			print("start")
 			
 
-			# set the model in training mode
+			# Setting the model in training mode
 			model.train()
-			# initialize the total training and validation loss
+			
+			# Initializing the total training and validation loss
 			totalTrainLoss = 0
 			totalValLoss = 0
-			# initialize the number of correct predictions in the training
+			testTotalValLoss=0
+			
+			# Initializing the number of correct predictions in the training
 			# and validation step
 			trainCorrect = 0
 			valCorrect = 0
-			# loop over the training set
+			testCorrect =0 
+			
+
+			# Loopign over the training set
 			i=0
 			for (x, y) in trainDataLoader:
 				print(i)
 				i+=1
 
-				# send the input to the device
+				# Sending the input to the device
 				(x, y) = (x.to(device), y.to(device))
-				# perform a forward pass and calculate the training loss
+				
+				# Performing a forward pass and calculate the training loss
 				pred = model(x)
 				loss = lossFn(pred, y)
-				# zero out the gradients, perform the backpropagation step,
+				
+
+				# Zero out the gradients, perform the backpropagation step,
 				# and update the weights
 				opt.zero_grad()
 				loss.backward()
 				opt.step()
+				
 				# add the loss to the total training loss so far and
 				# calculate the number of correct predictions
 				totalTrainLoss += loss
 
-				trainCorrect += (pred.argmax(1) == y).type(torch.float).sum().item()
+				trainCorrect += (pred.argmax(1) == y).type(tfloat).sum().item()
 
 
 			# Finding the performance parameters on the validation data
 			with torch.no_grad():
 				
-				# set the model in evaluation mode
+				# Setting the model in evaluation mode
 				model.eval()
-				# loop over the validation set
+				
+				# Loop over the validation set
 				for (x, y) in valDataLoader:
 					
-					# send the input to the device
+					# Sending the input to the device
 					(x, y) = (x.to(device), y.to(device))
 					
-					# make the predictions and calculate the validation loss
+					# Making the predictions and calculate the validation loss
 					pred = model(x)
 					
 					totalValLoss += lossFn(pred, y)
 					
-					# calculate the number of correct predictions
-					valCorrect += (pred.argmax(1) == y).type(torch.float).sum().item()
+					# Calculating the number of correct predictions
+					valCorrect += (pred.argmax(1) == y).type(tfloat).sum().item()
 
 			
 			# Calculating the average training and validation loss
 			avgTrainLoss = totalTrainLoss / trainSteps
 			avgValLoss = totalValLoss / valSteps
-			
+		
 
 			# Calculating the training and validation accuracy
 			trainCorrect = trainCorrect / len(trainDataLoader.dataset)
@@ -216,25 +215,16 @@ class KNasModel:
 		
 
 			# Updating the training performance status
-			modelPerfomanceStatus["train_loss"].append(avgTrainLoss.cpu().detach().numpy())
+			modelPerfomanceStatus["train_loss"].append(avgTrainLoss.to(device).detach().item())
 			modelPerfomanceStatus["train_acc"].append(trainCorrect)
-			modelPerfomanceStatus["val_loss"].append(avgValLoss.cpu().detach().numpy())
+			modelPerfomanceStatus["val_loss"].append(avgValLoss.to(device).detach().item())
 			modelPerfomanceStatus["val_acc"].append(valCorrect)
 			
-
-
-			# print the model training and validation information
-			# print("[INFO] EPOCH: {}/{}".format(e + 1, self.knasParams["EPOCHS"]))
-			# print("Train loss: {:.6f}, Train accuracy: {:.4f}".format(
-			# 	avgTrainLoss, trainCorrect))
-			# print("Val loss: {:.6f}, Val accuracy: {:.4f}\n".format(
-			# 	avgValLoss, valCorrect))
 
 
 			endTime= time()
 			
 			self.logModHand.knas_log_message(self.logModHand.loggingCodes['MODEL_TRAINING_FINISHED'],'INF')
-
 
 			# Setting the training duration
 			modelPerfomanceStatus["training_time"].append(endTime-startTime)
@@ -248,29 +238,29 @@ class KNasModel:
 			with torch.no_grad():
 
 
-				# set the model in evaluation mode
+				# Setting the model in evaluation mode
 				model.eval()
 				
-				# initialize a list to store our predictions
-				preds = []
-				# loop over the test set
+				# Looping over the test set
 				for (x, y) in testDataLoader:
-					# send the input to the device
+					
+					# Sending the input to the device
 					x = x.to(device)
-					# make the predictions and add them to the list
+					y=y.to(device)
+					
+					# Making the predictions and add them to the list
 					pred = model(x)
 					
-					preds.extend(pred.argmax(axis=1).cpu().numpy())
-				
+					testCorrect += (pred.argmax(1) == y).type(tfloat).sum().item()
+
+
 					testTotalValLoss+=lossFn(pred, y)
 
-				# generate a classification report
-				# testReport=(classification_report(testData.targets.cpu().numpy(),
-				# 	np.array(preds), target_names=testData.classes))
-
-				modelPerfomanceStatus["test_acc"].append(accuracy_score(testData.targets.cpu().numpy(),np.array(preds)))
 				
-				modelPerfomanceStatus["test_loss"].append((testTotalValLoss / testSteps).cpu().detach().numpy())
+
+				modelPerfomanceStatus["test_acc"].append(testCorrect)
+
+				modelPerfomanceStatus["test_loss"].append((testTotalValLoss / testSteps).to(device).detach().item())
 
 
 
