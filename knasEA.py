@@ -1,9 +1,11 @@
 from knasLN import CNLayer
 from knasLN import DFCLayer
 from knasModel import KNasModel
-
+from torch.nn import ReLU
+from torch.nn import MaxPool2d
 from random import randint
 from random import choice
+from random import choices
 from random import random
 
 from math import floor
@@ -82,11 +84,67 @@ class KNasEAIndividual:
 		self.create_random_individual(maxCNLayers)
 
 
+	def make_individual_valid(self):
+		'''
+			This function makes the individual a valid individual
+			by updating the output and input channels of the layers
+			based on their previous layer
+		'''	
+
+		# Input dimension to calculate the output size of the cn layers
+		inputDimension = self.inputDimension
+
+		# Number of output channels in the last cnn layer
+		lastLayerOutCh = 0 
+
+		
+
+		for i,l in enumerate(self.cnLayersList):
+
+			# Updating the dimension after the cn layer
+			inputDimension = ( (inputDimension - 2 + 2)//1 ) +1
+
+			# Check for the maxpool layer, maxpool layer is the last component of 
+			# the layer, i.e l[-1]
+			if isinstance(l[-1],MaxPool2d):
+				inputDimension = inputDimension // 2 
+
+
+			
+			# Updating the first layer input channel to 1, there is a possibility
+			# and it does not equal 1
+
+			if i == 0:
+				list(l)[0].in_channels=1
+				# print("0")
+				# print(l)
+			else:
+				# Update input channels based on the previous layer output channel
+				list(l)[0].in_channels = list(self.cnLayersList[i-1])[0].out_channels
+				# print("non")
+				# print(l)
+
+			self.cnLayersList[i]=l
+
+			# Updating the last layer output channel
+			lastLayerOutCh = list(self.cnLayersList[i])[0].out_channels
+
+		print("LIST")
+		print(self.cnLayersList)
+		print(lastLayerOutCh * (inputDimension**2))
+		# Setting the dfc layer's input channel
+		list(self.dfcLayer)[0].in_features = lastLayerOutCh * (inputDimension**2)
+
+
 
 	def create_random_individual(self,maxCNLayers):
 		'''
 			This function creates a random indivi
 		'''
+
+		# Input dimension to calculate the output size
+		inputDimension = self.inputDimension
+
 
 		# Setting the leraning rate
 		self.learningRate=random()
@@ -108,8 +166,8 @@ class KNasEAIndividual:
 			currLaFilterCnt = choice(self.filterPossValues)
 			
 			'''
-			 In the case of having convultional layer, 
-			 the output dimentsion would be:
+			 In the case of having convolutional layer, 
+			 the output dimension would be:
 			
 			 						(W-F+2p)/s + 1
 				 W: dim size
@@ -118,7 +176,8 @@ class KNasEAIndividual:
 				 S: stride
 				
 			'''
-			self.inputDimension = ( (self.inputDimension - 2 + 2)//1 ) +1
+			
+			inputDimension = ( (inputDimension - 2 + 2)//1 ) +1
 
 			# Batch norm value
 			batchNorm = choice([randint(1,self.batchNormMaxValue),None])
@@ -134,7 +193,7 @@ class KNasEAIndividual:
 
 			# If we have maxpooling , we divide the dimension
 			if maxPool:
-				self.inputDimension = (self.inputDimension // 2 )
+				inputDimension = inputDimension // 2 
 
 
 			# Adding a new CN layer to the previous layers
@@ -158,7 +217,7 @@ class KNasEAIndividual:
 
 
 		if numOfHiddenLayers==0:
-			numLearnParams,self.dfcLayer= DFCLayer( lastLayerOutCh * (self.inputDimension**2)  ,10,None,None,None,None,None,None,None,None).create_dfc_layer()
+			numLearnParams,self.dfcLayer= DFCLayer( lastLayerOutCh * (inputDimension**2)  ,10,None,None,None,None,None,None,None,None).create_dfc_layer()
 			self.dfcLayer = self.dfcLayer.to(self.device)
 			self.numLearnParams+=numLearnParams
 		else:
@@ -186,7 +245,7 @@ class KNasEAIndividual:
 
 			# We only have one hidden layer
 			if numOfHiddenLayers==1:
-				numLearnParams,self.dfcLayer= DFCLayer(lastLayerOutCh * (self.inputDimension**2)  ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,None,None,None,None).create_dfc_layer()
+				numLearnParams,self.dfcLayer= DFCLayer(lastLayerOutCh * (inputDimension**2)  ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,None,None,None,None).create_dfc_layer()
 				self.dfcLayer = self.dfcLayer.to(self.device)
 				self.numLearnParams += numLearnParams
 			else:
@@ -210,10 +269,12 @@ class KNasEAIndividual:
 
 
 				# Creating the dfc layer
-				numLearnParams,self.dfcLayer= DFCLayer( lastLayerOutCh * (self.inputDimension**2) ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,secNumOfNeurons,secBatchNorm,secActFunction,secDropout).create_dfc_layer()
+				numLearnParams,self.dfcLayer= DFCLayer( lastLayerOutCh * (inputDimension**2) ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,secNumOfNeurons,secBatchNorm,secActFunction,secDropout).create_dfc_layer()
 				self.dfcLayer = self.dfcLayer.to(self.device)
 				self.numLearnParams += numLearnParams
 	
+
+
 
 class KNasEA:
 
@@ -225,16 +286,16 @@ class KNasEA:
 	def __init__(self,datasetModule,knasParams):
 
 		# Population size
-		self.popSize=10
+		self.popSize=2
 
 		# Number of generations
-		self.genNum=20
+		self.genNum= 1
 
 		# Crossover probability
-		self.crossProb= 0.4
+		self.crossProb= 12
 
 		# Mutation probability
-		self.mutProb = 0.1
+		self.mutProb = 12
 
 		# Device to be used
 		self.device = knasParams["DEVICE"]
@@ -305,6 +366,92 @@ class KNasEA:
 			This function will perform the crossover method on two 
 			individuals selected from the population
 		'''
+
+		# Layers of the network in the individuals
+		ind1Layers = [ *ind1.cnLayersList ]
+		
+		ind2Layers = [ *ind2.cnLayersList ]
+
+
+		# Number of layers in each individual
+		numLayersInd1 = len(ind1Layers)
+		numLayersInd2 = len(ind2Layers)
+
+		# Setting the individual 1 as the individual 
+		# which has lowest number of layers
+		if numLayersInd2 < numLayersInd1:
+
+			# Switch individuals
+			ind1,ind2 = ind2,ind1
+			ind1Layers,ind2Layers = ind2Layers,ind1Layers
+			numLayersInd1,numLayersInd2 =  numLayersInd2,numLayersInd1
+
+		# Offsprings
+		off1 = None
+		off2 = None
+
+
+		if random() <= self.crossProb:
+
+
+			# Chossing crossover points in the first individual
+			point11,point12 = tuple(sorted(choices(range(numLayersInd1+1),k=2)))
+
+			# The portion has index: from point11 to (point12)+1, 
+			# so we have to convert point12 to a index value by
+			# subtracting 1 from it: 
+			point12-=1
+
+
+			# Chossing crossover points in the second individual, for this:
+			# Since the length of this portion should be same as the first
+			# individual, we first choose a random number and then randomly 
+			# choose its right side or left side to create a portion with the
+			# size we want.
+			sizeOfThePortion = point12 - point11 + 1 
+
+
+			point21 = choice(range(numLayersInd2+1))
+			point22 = point21
+			
+			if point21 - sizeOfThePortion < 0 :
+				# Chossing the right side
+				point22 += sizeOfThePortion
+			elif point21 + sizeOfThePortion > numLayersInd2+1:
+				# Chossing the left side
+				point21 -= sizeOfThePortion
+
+			else:
+				# Chossing the side randomly,
+				side = choice(["right","left"])
+
+				if side == "right":
+					point22 += sizeOfThePortion
+				else:
+					point21 -= sizeOfThePortion
+
+			# Converting the point22 to index
+			point22 -=1 
+
+			# Creating the offsprings
+
+			off1 = ind1Layers[:point11] + ind2Layers[point21:point22+1] + ind1Layers[point12+1:]
+
+			off2 = ind2Layers[:point21] + ind1Layers[point11:point12+1] + ind2Layers[point22+1:]
+	
+
+			# Swapping dfc layers with 50% probability
+			if random() <= 0.5:
+				ind1.dfcLayer,ind2.dfcLayer=ind2.dfcLayer,ind1.dfcLayer
+
+			# Updating the individuals and making them valid
+			ind1.cnLayersList = off1
+			ind1.make_individual_valid()
+
+
+			ind2.cnLayersList = off2
+			ind1.make_individual_valid()
+
 
 		return ind1,ind2
 	

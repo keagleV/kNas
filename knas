@@ -162,7 +162,7 @@ class KNas:
 		popSize = len(population)
 
 		# Evaluating the initial population
-		population = self.eaAlgo.knasea_calculate_fitness(population)
+		# population = self.eaAlgo.knasea_calculate_fitness(population)
 
 
 
@@ -180,23 +180,23 @@ class KNas:
 			# Choose two individuals randomly from the population
 			ind1 , ind2 = tuple(choices(population,k=2))
 
-
 			'''
 				Crossover
 			'''
 			off1, off2 = self.eaAlgo.knasea_crossover(ind1,ind2)
 
-
-
+			# exit(0)
+			print("Crossover finished")
 			'''
 				Mutation
 			'''
-			off1, off2 = self.eaAlgo.knasea_crossover(off1,off2)
+			# off1, off2 = self.eaAlgo.knasea_mutation(off1,off2)
 
 			
 			# Evaluating the offsprings as members of a short time population
 			offsPopulation = self.eaAlgo.knasea_calculate_fitness([off1,off2])
 
+			exit(0)
 
 			# Add offsprings to the population
 			population+= offsPopulation
