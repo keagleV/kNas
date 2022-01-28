@@ -263,8 +263,8 @@ class KNasLayersNet(Module):
 		
 	def forward(self, x):
 
-		# Forward the data through the CN layers
 
+		# Forward the data through the CN layers
 		for cnnLayer in self.cnnLayers:
 			x=cnnLayer(x)
 

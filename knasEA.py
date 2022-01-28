@@ -1,13 +1,15 @@
 from knasLN import CNLayer
 from knasLN import DFCLayer
 from knasModel import KNasModel
-from torch.nn import ReLU
 from torch.nn import MaxPool2d
+from torch.nn import Linear
+from torch.nn import Sequential
+from torch.nn import Conv2d
+
 from random import randint
 from random import choice
 from random import choices
 from random import random
-
 from math import floor
 
 
@@ -84,12 +86,19 @@ class KNasEAIndividual:
 		self.create_random_individual(maxCNLayers)
 
 
+	# def weight_reset(self,m):
+	# 	if isinstance(m, Conv2d) or isinstance(m, Linear):
+	# 		m.reset_parameters()
+
+
+
 	def make_individual_valid(self):
 		'''
 			This function makes the individual a valid individual
 			by updating the output and input channels of the layers
 			based on their previous layer
 		'''	
+		
 
 		# Input dimension to calculate the output size of the cn layers
 		inputDimension = self.inputDimension
@@ -115,25 +124,38 @@ class KNasEAIndividual:
 			# and it does not equal 1
 
 			if i == 0:
-				list(l)[0].in_channels=1
-				# print("0")
-				# print(l)
-			else:
-				# Update input channels based on the previous layer output channel
-				list(l)[0].in_channels = list(self.cnLayersList[i-1])[0].out_channels
-				# print("non")
-				# print(l)
+				inch = 1
+				och = list(l)[0].out_channels
 
-			self.cnLayersList[i]=l
+			else:
+				
+				# Update input channels based on the previous layer output channel
+				
+				inch = list(self.cnLayersList[i-1])[0].out_channels
+				och = list(l)[0].in_channels
+				
+
+
+			self.cnLayersList[i]= Sequential( *([Conv2d(in_channels=inch, 
+							out_channels=och,
+							kernel_size=2,
+							stride=1,
+							padding=1)
+							] + list(l)[1:] ) ).to("cuda")
 
 			# Updating the last layer output channel
 			lastLayerOutCh = list(self.cnLayersList[i])[0].out_channels
 
-		print("LIST")
-		print(self.cnLayersList)
-		print(lastLayerOutCh * (inputDimension**2))
+
 		# Setting the dfc layer's input channel
-		list(self.dfcLayer)[0].in_features = lastLayerOutCh * (inputDimension**2)
+		inch= lastLayerOutCh * (inputDimension**2)
+		och= list(self.dfcLayer)[0].out_features
+		self.dfcLayer = Sequential( *([Linear(inch,och)] + list(self.dfcLayer[1:] )) ).to('cuda')
+		# self.dfcLayer.apply(self.weight_reset)
+
+		
+		
+		# list(self.dfcLayer)[0].in_features = lastLayerOutCh * (inputDimension**2)
 
 
 
