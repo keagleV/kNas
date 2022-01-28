@@ -51,7 +51,7 @@ class KNasEAIndividual:
 	'''
 		This class has implemented the individual solutions of the EA algorithm
 	'''
-	def __init__(self,maxCNLayers,device):
+	def __init__(self,knasParams):
 
 		# Fitness value of the individual
 		self.fitnessVal=int()
@@ -72,16 +72,16 @@ class KNasEAIndividual:
 		self.dfcLayer=None
 
 		# Device to be used to create the layers of this individual
-		self.device=device
+		self.device = knasParams['DEVICE']
 
 		# Learning rate
 		self.learningRate = float()
 
 		# Input dimenesion: 1 * dim * dim 
-		self.inputDimension = 32
+		self.inputDimension = knasParams['INPUT_DIM']
 
 		# Possible values for the filter count
-		self.filterPossValues = [ 1, 2, 4 , 8, 16, 32, 64, 128 ]
+		self.filterPossValues = knasParams['FILTER_POSS_VALUES']
 
 		# Possible values for the batch norm
 		self.batchNormMaxValue = 100
@@ -90,10 +90,10 @@ class KNasEAIndividual:
 		self.actFuncPossValues = ['relu','sigmoid']
 
 		# Possible values for the dfc hidden layer neurons
-		self.dfcHiLaPossNeuronValues = [ 2, 4 , 8, 16, 32, 64, 128 , 256 , 512 ]
+		self.dfcHiLaPossNeuronValues = knasParams['HIDDEN_LAYERS_NEURONS_POSS_VALUE']
 
 
-		self.create_random_individual(maxCNLayers)
+		self.create_random_individual(knasParams['MAX_CNN'],knasParams['KERNEL_SIZE'],knasParams['PADDING'],knasParams['STRIDE'])
 
 
 	# def weight_reset(self,m):
@@ -147,8 +147,9 @@ class KNasEAIndividual:
 				inch = list(self.cnLayersList[i-1])[0].out_channels
 				och = list(l)[0].in_channels
 
-				# Checking for batchnorm
-				if isinstance(list(l)[1],BatchNorm2d):
+				# Checking for batchnorm, check the length first since
+				# the layer can have only conv2d
+				if len(list(l))>1 and isinstance(list(l)[1],BatchNorm2d):
 					batchNorm=BatchNorm2d(och)
 				
 
@@ -167,7 +168,7 @@ class KNasEAIndividual:
 				finalComps+=list(l)[1:]
 
 
-			self.cnLayersList[i]= Sequential(*finalComps).to("cuda")
+			self.cnLayersList[i]= Sequential(*finalComps).to(self.device)
 
 			# Updating the last layer output channel
 			lastLayerOutCh = list(self.cnLayersList[i])[0].out_channels
@@ -176,7 +177,7 @@ class KNasEAIndividual:
 		# Setting the dfc layer's input channel
 		inch= lastLayerOutCh * (inputDimension**2)
 		och= list(self.dfcLayer)[0].out_features
-		self.dfcLayer = Sequential( *([Linear(inch,och)] + list(self.dfcLayer[1:] )) ).to('cuda')
+		self.dfcLayer = Sequential( *([Linear(inch,och)] + list(self.dfcLayer[1:] )) ).to(self.device)
 		
 
 		# self.dfcLayer.apply(self.weight_reset)
@@ -184,7 +185,7 @@ class KNasEAIndividual:
 
 
 
-	def create_random_individual(self,maxCNLayers):
+	def create_random_individual(self,maxCNLayers , kernelSize , padding , stride):
 		'''
 			This function creates a random indivi
 		'''
@@ -224,7 +225,7 @@ class KNasEAIndividual:
 				
 			'''
 			
-			inputDimension = ( (inputDimension - 2 + 2)//1 ) +1
+			inputDimension = ( (inputDimension - kernelSize + 2*padding )// stride ) + 1
 
 			# Batch norm value
 			batchNorm = choice([randint(1,self.batchNormMaxValue),None])
@@ -236,15 +237,15 @@ class KNasEAIndividual:
 			dropout = choice ([random(),None])
 
 			# Maxpool value
-			maxPool = choice([ 2, None ])
+			maxPool = choice([ kernelSize , None ])
 
 			# If we have maxpooling , we divide the dimension
 			if maxPool:
-				inputDimension = inputDimension // 2 
+				inputDimension = inputDimension // kernelSize 
 
 
 			# Adding a new CN layer to the previous layers
-			numLearnParams,cnLayer = CNLayer(lastLayerOutCh,currLaFilterCnt,2,1,1,batchNorm,actFunction,dropout,maxPool).create_cn_layer()
+			numLearnParams,cnLayer = CNLayer(lastLayerOutCh,currLaFilterCnt,kernelSize,padding,stride,batchNorm,actFunction,dropout,maxPool).create_cn_layer()
 			
 			# Adding the learnable parameters count
 			self.numLearnParams += numLearnParams
@@ -333,50 +334,44 @@ class KNasEA:
 	def __init__(self,datasetModule,knasParams):
 
 		# Population size
-		self.popSize=2
+		self.popSize= knasParams['POP_SIZE']
 
 		# Number of generations
-		self.genNum= 1
+		self.genNum= knasParams['GEN_NUM']
 
 		# Crossover probability
-		self.crossProb= 0.9
+		self.crossProb= knasParams['CROSS_PROB']
 
 		# Mutation probability
-		self.mutProb = 0.9
+		self.mutProb = knasParams['MUT_PROB']
 
 		# Mutation opearations probabilities
-		self.mutAddProb = 12
-		self.mutModProb = 1
-		self.mutRemProb = 1
+		self.mutAddProb = knasParams['MUT_ADD_PROB']
+		self.mutModProb = knasParams['MUT_MOD_PROB']
+		self.mutRemProb = knasParams['MUT_REM_PROB']
 
 		# Mutation add operations
-		self.mutAddBatchNorm = 12
-		self.mutAddAcFunc = 0.1
-		self.mutAddDropout = 0.1
-		self.mutAddMaxPool = 0.1
+		self.mutAddBatchNorm = knasParams['MUT_ADD_BATCHNORM_PROB']
+		self.mutAddAcFunc = knasParams['MUT_ADD_ACTFUNC_PROB']
+		self.mutAddDropout = knasParams['MUT_ADD_DROPOUT_PROB']
+		self.mutAddMaxPool = knasParams['MUT_ADD_MAXPOOL_PROB']
 
 		# Mutation modify operations
-		self.mutModAcFunc = 0.1
-		self.mutModDropout = 3
-		self.mutModFilters = 0.2
-
-
+		self.mutModAcFunc = knasParams['MUT_MOD_ACTFUNC_PROB']
+		self.mutModDropout = knasParams['MUT_MOD_DROPOUT_PROB']
+		self.mutModFilters = knasParams['MUT_MOD_FILTERS_PROB']
 
 
 		# Mutation modify operations
-		self.mutRemCnLayer=0.1
-		self.mutRemBatchNorm = 0.1
-		self.mutRemAcFunc = 0.1
-		self.mutRemDropout = 0.1
-		self.mutRemMaxPool= 0.1
+		self.mutRemCnLayer = knasParams['MUT_REM_CNLAYER_PROB']
+		self.mutRemBatchNorm = knasParams['MUT_REM_BATCHNORM_PROB']
+		self.mutRemAcFunc = knasParams['MUT_REM_ACTFUNC_PROB']
+		self.mutRemDropout = knasParams['MUT_REM_DROPOUT_PROB']
+		self.mutRemMaxPool= knasParams['MUT_REM_MAXPOOL_PROB']
 
 
-
-		# Device to be used
-		self.device = knasParams["DEVICE"]
-
-		# Maximum number of CN layers in an individual
-		self.maxCNLayers=knasParams['MAX_CN_LAYERS']
+		# KNAS parameters for later usage
+		self.knasParams = knasParams
 
 		# Logging module handler
 		self.logModHand= KNasEALogging()
@@ -403,7 +398,7 @@ class KNasEA:
 		population=list()
 
 		for i in range(self.popSize):
-			population.append(KNasEAIndividual(self.maxCNLayers,self.device))
+			population.append(KNasEAIndividual(self.knasParams))
 
 
 		return population
@@ -654,7 +649,7 @@ class KNasEA:
 					elif modOp == "modFil":
 
 						# Number of filters to be set
-						numFilters = choice([ 1, 2, 4 , 8, 16, 32, 64, 128 ])
+						numFilters = choice(self.knasParams['FILTER_POSS_VALUES'])
 
 						# Parameters of current conv2d
 						inputChannels = listl[0].in_channels

@@ -36,6 +36,7 @@ class KNas:
 		self.knasParams=dict()
 
 
+
 	def knas_argument_parser(self):
 		'''
 			This function has implemented the terminal argument parser of the KNAS
@@ -65,78 +66,14 @@ class KNas:
 			This function will parse the configuration file
 		'''
 
-		fhandle=open(self.confFilePath)
+		status,val = self.confModHand.get_parameters(self.confFilePath)
 
-		fileLines=fhandle.readlines()
-
-		fhandle.close()
-
-
-		for lineNum,line in enumerate(fileLines):
-
-			line=line.strip()
-
-			# Line number starts from zero, to handle this, we increment it 
-			# to adjust it to start from one.
-			lineNum+=1
-
-			if line:
-
-				if line.startswith('#'):
-					continue
-
-				# TODO inline function return
-				value= self.confModHand.get_max_cnn_layer_value(line)
-
-				if (value): 
-					self.knasParams['MAX_CN_LAYERS']= int(value)
-					continue
-
-				value= self.confModHand.get_batchSize_value(line)
-
-				if (value): 
-					self.knasParams['BATCH_SIZE']= int(value)
-					continue
-
-
-				value= self.confModHand.get_epochs_value(line)
-
-				if (value): 
-					self.knasParams['EPOCHS']= int(value)
-					continue
-
-				value= self.confModHand.get_trainsplit_value(line)
-
-				if (value): 
-					self.knasParams['TRAIN_SPLIT']= float(value)
-					continue
-
-				value= self.confModHand.get_device_value(line)
-
-				if (value): 
-					self.knasParams['DEVICE']= value
-					continue
-
-
-				value=self.confModHand.get_trainRootDir_value(line)
-				if value:
-					self.knasParams['TRAIN_ROOT_DIR']=value
-					continue
-
-				value=self.confModHand.get_testRootDir_value(line)
-				if value:
-					self.knasParams['TEST_ROOT_DIR']=value
-					continue
-
-				value=self.confModHand.get_splitseed_value(line)
-				if value:
-					self.knasParams['SPLIT_SEED']=int(value)
-					continue
-
-
-
-				self.logModHand.knas_log_message(self.logModHand.loggingCodes['CONFIG_FILE_DEF_ERR'],'ERR',lineNum)
+		if not status:
+				self.logModHand.knas_log_message(self.logModHand.loggingCodes['CONFIG_FILE_DEF_ERR'],'ERR',val)
 				exit(1)
+
+		# If it was success, val is the dictionary of the parameters
+		self.knasParams=val
 
 
 	def start_evaluation(self):
@@ -144,8 +81,6 @@ class KNas:
 			This is the main function of the KNAS program. This will start the
 			EA algorithm and use the KNAS model classes to evaluate each individual and so on.
 		'''
-		
-
 
 		# First set the EA algorithm handler
 		self.eaAlgo = KNasEA(self.datasetModule,self.knasParams)
