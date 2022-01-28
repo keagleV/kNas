@@ -11,7 +11,7 @@ class KNasConfFile:
 		self.maxCNNLayersr = '\s*MAX_CNN\s*=\s*[1-9][0-9]*\s*'
 
 		# BATCH_SIZE_REGEX
-		self.batchSizer ='\s*BATCH_SIZE\s*=\s*([+-]?([0-9]*[.])?[0-9]+)\s*'
+		self.batchSizer ='\s*BATCH_SIZE\s*=\s*[1-9][0-9]*\s*'
 
 		# EPOCHS_REGEX
 		self.epochsr= '\s*EPOCHS\s*=\s*([+-]?([0-9]*[.])?[0-9]+)\s*'
@@ -31,6 +31,18 @@ class KNasConfFile:
 		# Split Seed
 		self.splitSeedr = '\s*SPLIT_SEED\s*=\s*[1-9][0-9]*\s*'
 
+		# Population size
+		self.popSize = '\s*POP_SIZE\s*=\s*([1-9][0-9]*[02468])\s*'
+
+		# Generation evolution count
+		self.genNum = '\s*GEN_NUM\s*=\s*\[\s*[1-9][0-9]*\s*\]\s*'
+
+	
+		# Mutation Prob
+		self.crossProb = '\s*CROSS_PROB\s*=\s*\[\s*((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+		# Mutation Prob
+		self.mutProb = '\s*MUT_PROB\s*=\s*\[\s*((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 
 	def get_splitseed_value(self,definition):
