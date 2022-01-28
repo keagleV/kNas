@@ -102,12 +102,12 @@ class KNasModel:
 		model = KNasLayersNet( 1, cnnLayers , dfcLayer).to(device)		
 
 		
-		# For DEBUG
-		for la in cnnLayers:
-			print(la)
+		# # For DEBUG
+		# for la in cnnLayers:
+		# 	print(la)
 
-		print("--------/////------------")
-		print(dfcLayer)
+		# print("--------/////------------")
+		# print(dfcLayer)
 
 
 
@@ -136,10 +136,12 @@ class KNasModel:
 		# Setting the start time
 		startTime=time()
 
+		epoch=0
 		for e in range(0, self.knasParams["EPOCHS"]):
 
-			print("start")
-			
+			# print("start")
+			print("EPOCH: ",epoch)
+			epoch+=1
 
 			# Setting the model in training mode
 			model.train()
@@ -159,8 +161,8 @@ class KNasModel:
 			# Loopign over the training set
 			i=0
 			for (x, y) in trainDataLoader:
-				print(i)
-				i+=1
+				# print(i)
+				# i+=1
 
 				# Sending the input to the device
 				(x, y) = (x.to(device), y.to(device))
@@ -222,14 +224,6 @@ class KNasModel:
 			
 
 
-			endTime= time()
-			
-			self.logModHand.knas_log_message(self.logModHand.loggingCodes['MODEL_TRAINING_FINISHED'],'INF')
-
-			# Setting the training duration
-			modelPerfomanceStatus["training_time"].append(endTime-startTime)
-
-
 			# Finding the performance parameters on the test data
 			
 			# Total loss value of the testing phase
@@ -263,6 +257,13 @@ class KNasModel:
 				modelPerfomanceStatus["test_loss"].append((testTotalValLoss / testSteps).to(device).detach().item())
 
 
+		# Setting the end time
+		endTime= time()
+		
+		self.logModHand.knas_log_message(self.logModHand.loggingCodes['MODEL_TRAINING_FINISHED'],'INF')
+
+		# Setting the training duration
+		modelPerfomanceStatus["training_time"].append(endTime-startTime)
 
 
 		#TODO average is rrequired?

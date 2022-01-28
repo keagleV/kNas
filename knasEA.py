@@ -3,7 +3,6 @@ from knasLN import DFCLayer
 from knasModel import KNasModel
 
 
-
 from torch.nn import Module
 from torch.nn import Conv2d
 from torch.nn import Linear
@@ -16,15 +15,13 @@ from torch.nn import Dropout
 from torch.nn import Flatten
 from torch.nn import BatchNorm2d
 
-
-
-
 from random import randint
 from random import choice
 from random import choices
 from random import random
-from math import floor
 
+
+from statistics import mean
 
 
 
@@ -61,6 +58,9 @@ class KNasEAIndividual:
 
 		# Fitness value of the individual
 		self.fitnessVal=int()
+
+		# Performance status parameters
+		self.performanceStatus = None
 
 		# Number of learnable parameters of this individual
 		self.numLearnParams = int()
@@ -345,10 +345,7 @@ class KNasEA:
 
 		# Mutation modify operations
 		self.mutModAcFunc = 0.1
-		self.mutModDropout = 0.1
-		self.mutModDropoutInc = 0.1
-		self.mutModDropoutDec = 0.1
-		self.mutModDropoutScale= 2
+		self.mutModDropout = 3
 		self.mutModFilters = 0.2
 
 
@@ -413,16 +410,29 @@ class KNasEA:
 
 			performanceStatus = self.knasModelHand.knas_create_eval_model(ind.cnLayersList,ind.dfcLayer,ind.learningRate)
 
+			# Setting the performance status of the individual
+			ind.performanceStatus = performanceStatus
 			# Calcualting the fitness value based on the performance status
-			
-			# average of epochs
-			print("HI")
-			print(performanceStatus)
-			print(ind.numLearnParams)
 
-			ind.fitnessVal=randint(1,100)
 
-			# Updating the individuals
+			# Calculating the mean values of epochs
+			meanTrainDuration = mean(performanceStatus['training_time'])
+
+			meanTrainAcc = mean(performanceStatus['train_acc'])
+
+			meanTrainLoss = mean(performanceStatus['train_loss'])
+
+			meanValAcc= mean(performanceStatus['val_acc'])
+
+			meanValLoss= mean(performanceStatus['val_loss'])
+
+			meanTestAcc= mean(performanceStatus['test_acc'])
+
+			meanTestLoss= mean(performanceStatus['test_loss'])
+
+			# Setting the fitness value
+			ind.fitnessVal = meanTestAcc
+
 
 
 		return population
@@ -614,25 +624,13 @@ class KNasEA:
 
 					elif modOp == "modDr":
 
-						# Choosing the dropout action
-						dropOp =  choices(["drInc","drDec"],weights=[self.mutModDropoutInc,self.mutModDropoutDec],k=1)[0]
-
 						# Modifying the dropout probability instance in the sequential
 						for i,com in enumerate(listl):
 							
 							if isinstance(com,Dropout):
 								
-								# Previous dropout probability
-								droupOutProb = com.p
-
-								if dropOp == "drInc":
-									droupOutProb *= self.mutModDropoutScale
-
-								elif dropOp == "drDec":
-									droupOutProb /= self.mutModDropoutScale
-
 								# Creating new instance
-								listl[i]= Dropout(droupOutProb)
+								listl[i]= Dropout(random())
 								
 								break
 

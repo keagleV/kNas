@@ -162,7 +162,7 @@ class KNas:
 		popSize = len(population)
 
 		# Evaluating the initial population
-		# population = self.eaAlgo.knasea_calculate_fitness(population)
+		population = self.eaAlgo.knasea_calculate_fitness(population)
 
 
 
@@ -178,18 +178,19 @@ class KNas:
 			'''
 
 			# Choose two individuals randomly from the population
+			print("Selection")
 			ind1 , ind2 = tuple(choices(population,k=2))
 
 			'''
 				Crossover
 			'''
-			print("cross")
+			print("Crossover")
 			off1, off2 = self.eaAlgo.knasea_crossover(ind1,ind2)
 
 			'''
 				Mutation
 			'''
-			print("mutation")
+			print("Mutation")
 			off1 = self.eaAlgo.knasea_mutation(off1)
 			# Make the offspring a valid offspring
 
@@ -209,17 +210,27 @@ class KNas:
 
 
 			'''
-				Surivivol selection
+				Surivival selection
 			'''
 
 			# Sorting the population based on the fitness value first, and then
-			# select the population size individuals from the population
-			population = sorted(population,key=lambda ind: ind.fitnessVal)[:popSize]
+			# select the population_size individuals from the population
+			print("Survival Selection")
+	
+			population = sorted(population,key=lambda ind: ind.fitnessVal,reverse=True)[:popSize]
 
 
 
 		# EA algorithm finished, the first individual is the one with
 		# the highest fitness value
+
+		print("EA Finished")
+
+		bestIndividual = population[0]
+
+
+		print(bestIndividual.fitnessVal)
+		print(bestIndividual.performanceStatus)
 		
 
 
