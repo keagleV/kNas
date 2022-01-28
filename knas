@@ -183,20 +183,25 @@ class KNas:
 			'''
 				Crossover
 			'''
+			print("cross")
 			off1, off2 = self.eaAlgo.knasea_crossover(ind1,ind2)
 
-			# exit(0)
-			print("Crossover finished")
 			'''
 				Mutation
 			'''
-			# off1, off2 = self.eaAlgo.knasea_mutation(off1,off2)
+			print("mutation")
+			off1 = self.eaAlgo.knasea_mutation(off1)
+			# Make the offspring a valid offspring
 
-			
+			off1.make_individual_valid()
+
+			off2 = self.eaAlgo.knasea_mutation(off2)
+			# Make the offspring a valid offspring
+			off2.make_individual_valid()
+
 			# Evaluating the offsprings as members of a short time population
 			offsPopulation = self.eaAlgo.knasea_calculate_fitness([off1,off2])
 
-			exit(0)
 
 			# Add offsprings to the population
 			population+= offsPopulation

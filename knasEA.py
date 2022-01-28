@@ -1,10 +1,23 @@
 from knasLN import CNLayer
 from knasLN import DFCLayer
 from knasModel import KNasModel
-from torch.nn import MaxPool2d
-from torch.nn import Linear
-from torch.nn import Sequential
+
+
+
+from torch.nn import Module
 from torch.nn import Conv2d
+from torch.nn import Linear
+from torch.nn import MaxPool2d
+from torch.nn import ReLU
+from torch.nn import Sigmoid
+from torch.nn import LogSoftmax
+from torch.nn import Sequential
+from torch.nn import Dropout
+from torch.nn import Flatten
+from torch.nn import BatchNorm2d
+
+
+
 
 from random import randint
 from random import choice
@@ -71,7 +84,7 @@ class KNasEAIndividual:
 		self.inputDimension = 32
 
 		# Possible values for the filter count
-		self.filterPossValues = [ 2, 4 , 8, 16, 32, 64, 128 ]
+		self.filterPossValues = [ 1, 2, 4 , 8, 16, 32, 64, 128 ]
 
 		# Possible values for the batch norm
 		self.batchNormMaxValue = 100
@@ -314,10 +327,41 @@ class KNasEA:
 		self.genNum= 1
 
 		# Crossover probability
-		self.crossProb= 12
+		self.crossProb= 0.9
 
 		# Mutation probability
-		self.mutProb = 12
+		self.mutProb = 0.9
+
+		# Mutation opearations probabilities
+		self.mutAddProb = 12
+		self.mutModProb = 1
+		self.mutRemProb = 1
+
+		# Mutation add operations
+		self.mutAddBatchNorm = 0.1
+		self.mutAddAcFunc = 0.1
+		self.mutAddDropout = 0.1
+		self.mutAddMaxPool = 0.1
+
+		# Mutation modify operations
+		self.mutModAcFunc = 0.1
+		self.mutModDropout = 0.1
+		self.mutModDropoutInc = 0.1
+		self.mutModDropoutDec = 0.1
+		self.mutModDropoutScale= 2
+		self.mutModFilters = 0.2
+
+
+
+
+		# Mutation modify operations
+		self.mutRemCnLayer=0.1
+		self.mutRemBatchNorm = 0.1
+		self.mutRemAcFunc = 0.1
+		self.mutRemDropout = 0.1
+		self.mutRemMaxPool= 0.1
+
+
 
 		# Device to be used
 		self.device = knasParams["DEVICE"]
@@ -382,6 +426,8 @@ class KNasEA:
 
 
 		return population
+
+	
 
 	def knasea_crossover(self,ind1 , ind2 ):
 		'''
@@ -478,13 +524,190 @@ class KNasEA:
 		return ind1,ind2
 	
 	
-	def knasea_mutation(self,ind1 , ind2 ):
+	def knasea_mutation(self,ind):
 		'''
-			This function will perform the mutation method on two 
-			offsprings created from the crossover phase
+			This function will perform the mutation method on the 
+			offspring created from the crossover phase
 		'''
 
-		return ind1,ind2
+		# List of new layers after mutation
+		newLayers = []
+
+
+		for l in ind.cnLayersList:
+
+			listl = list(l)
+
+
+			if random() < self.mutProb:
+
+				# Decide on the type of operation
+				op = choices(["add","mod","rem"],weights=[self.mutAddProb,self.mutModProb,self.mutRemProb],k=1)[0]
+				
+
+				if op=="add":
+
+					# Possible components of the given cn layer
+					components = [None]*5
+
+					for com in listl:
+						if isinstance(com,Conv2d):
+							components[0] = com
+						elif isinstance(com,BatchNorm2d):
+							components[1] = com
+						elif isinstance(com,ReLU):
+							components[2] = com
+						elif isinstance(com,Sigmoid):
+							components[2] = com
+						elif isinstance(com,Dropout):
+							components[3] = com
+						elif isinstance(com,MaxPool2d):
+							components[4] = com
+
+					# Decide on the type of add operation
+					addOp =  choices(["addBatch","addAf","addDr","addMax"],weights=[self.mutAddBatchNorm,self.mutAddAcFunc,self.mutAddDropout,self.mutAddMaxPool],k=1)[0]
+					
+					# Adding batch norm only if it does not exist
+					if ( addOp == "addBatch" ) and (components[1]==None):
+						pass
+
+					# Adding activation function only if it does not exist
+					elif ( addOp == "addAf" ) and (components[2]==None):
+						
+						# Randomly choose an activation function
+						components[2] = choice([ReLU(),Sigmoid()])
+						
+
+
+					# Adding dropout only if it does not exist
+					elif ( addOp == "addDr") and (components[3]==None):
+						
+						# Adding a random dropout object
+						components[3] = Dropout(random())
+						
+					# Adding maxpool only if it does not exist
+					elif (addOp == "addMax") and (components[4]==None):
+						
+						# Adding a maxpool layer
+						components[4] = MaxPool2d(kernel_size=(2,2))
+					
+					# Removing the None objects from the components list and
+					# updating the listl list
+					listl = [com for com in components if com!=None]
+
+				elif op == "mod":
+
+					# Decide on the type of modify operation
+					modOp =  choices(["modAf","modDr","modFil"],weights=[self.mutModAcFunc,self.mutModDropout,self.mutModFilters],k=1)[0]
+
+					if modOp == "modAf":
+
+						# Switching the activation function instance in the sequential
+						for i,com in enumerate(listl):
+							if isinstance(com,Sigmoid):
+								listl[i] = ReLU()
+								break
+							elif isinstance(com,ReLU):
+								listl[i]= Sigmoid()
+								break
+
+
+					elif modOp == "modDr":
+
+						# Choosing the dropout action
+						dropOp =  choices(["drInc","drDec"],weights=[self.mutModDropoutInc,self.mutModDropoutDec],k=1)[0]
+
+						# Modifying the dropout probability instance in the sequential
+						for i,com in enumerate(listl):
+							
+							if isinstance(com,Dropout):
+								
+								# Previous dropout probability
+								droupOutProb = com.p
+
+								if dropOp == "drInc":
+									droupOutProb *= self.mutModDropoutScale
+
+								elif dropOp == "drDec":
+									droupOutProb /= self.mutModDropoutScale
+
+								# Creating new instance
+								listl[i]= Dropout(droupOutProb)
+								
+								break
+
+
+					elif modOp == "modFil":
+
+						# Number of filters to be set
+						numFilters = choice([ 1, 2, 4 , 8, 16, 32, 64, 128 ])
+
+						# Parameters of current conv2d
+						inputChannels = listl[0].in_channels
+						kernelSize = listl[0].kernel_size
+						padding = listl[0].padding
+						stride = listl[0].stride
+
+						listl[0]= Conv2d(in_channels=inputChannels, 
+							out_channels=numFilters,
+							kernel_size= kernelSize ,
+							stride=stride,
+							padding=padding)
+							
+
+
+
+
+				elif op=="rem":
+
+					# Decide on the type of remove operation
+					remOp =  choices(["remCnLayer","remBatch","remAf","remDr","remMax"],weights=[self.mutRemCnLayer,self.mutRemBatchNorm,self.mutRemAcFunc,self.mutRemDropout,self.mutRemMaxPool],k=1)[0]
+
+					if remOp == "remCnLayer":
+						continue
+
+					elif remOp == "remBatch":
+						
+						# Removing the BatchNorm2d instance in the sequential
+						for com in listl:
+							if isinstance(com,BatchNorm2d):
+								listl.remove(com)
+								break
+
+
+					elif remOp == "remAf":
+
+						# Removing the activation function instance in the sequential
+						for com in listl:
+							if isinstance(com,Sigmoid) or isinstance(com,ReLU):
+								listl.remove(com)
+								break
+						
+
+					elif remOp == "remDr":
+
+						# Removing the dropout instance in the sequential
+						for com in listl:
+							if isinstance(com,Dropout):
+								listl.remove(com)
+								break
+
+					elif remOp == "remMax":
+
+						# Removing the maxpool instance in the sequential
+						for com in listl:
+							if isinstance(com,MaxPool2d):
+								listl.remove(com)
+								break
+
+				newLayers.append(Sequential(*listl))
+
+
+
+		# Updating the cn layers of the individual
+		ind.cnLayersList = newLayers
+
+		return ind
 
 
 
