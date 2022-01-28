@@ -1,17 +1,12 @@
-
-from time import time
-
 from knasLN import KNasLayersNet
 from knasModelLogging import KNasModelLogging
-
-
 from torch import float as tfloat
 from torch import cuda
 from torch.optim import Adam
 from torch.nn import CrossEntropyLoss
 from torch import cuda
 from torch import no_grad
-
+from time import time
 
 
 
@@ -139,7 +134,6 @@ class KNasModel:
 		epoch=0
 		for e in range(0, self.knasParams["EPOCHS"]):
 
-			# print("start")
 			print("EPOCH: ",epoch)
 			epoch+=1
 

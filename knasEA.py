@@ -14,13 +14,10 @@ from torch.nn import Sequential
 from torch.nn import Dropout
 from torch.nn import Flatten
 from torch.nn import BatchNorm2d
-
 from random import randint
 from random import choice
 from random import choices
 from random import random
-
-
 from statistics import mean
 
 
@@ -34,7 +31,7 @@ class KNasEALogging():
 
 		self.loggingCodes = {
 			
-			'INIT_POPULATION_GEN':'Generating The Initial Population',
+			'INIT_POPULATION_GEN':'Generating The Initial Population ...',
 
 		
 		}
@@ -135,6 +132,9 @@ class KNasEAIndividual:
 			
 			# Updating the first layer input channel to 1, there is a possibility
 			# and it does not equal 1
+			inch=0
+			och=0
+			batchNorm=None
 
 			if i == 0:
 				inch = 1
@@ -146,15 +146,28 @@ class KNasEAIndividual:
 				
 				inch = list(self.cnLayersList[i-1])[0].out_channels
 				och = list(l)[0].in_channels
+
+				# Checking for batchnorm
+				if isinstance(list(l)[1],BatchNorm2d):
+					batchNorm=BatchNorm2d(och)
 				
 
-
-			self.cnLayersList[i]= Sequential( *([Conv2d(in_channels=inch, 
+			# List of final layers
+			finalComps = [Conv2d(in_channels=inch, 
 							out_channels=och,
 							kernel_size=2,
 							stride=1,
 							padding=1)
-							] + list(l)[1:] ) ).to("cuda")
+							]
+
+			if batchNorm:
+				finalComps.append(batchNorm)
+				finalComps+=list(l)[2:]
+			else:
+				finalComps+=list(l)[1:]
+
+
+			self.cnLayersList[i]= Sequential(*finalComps).to("cuda")
 
 			# Updating the last layer output channel
 			lastLayerOutCh = list(self.cnLayersList[i])[0].out_channels
@@ -164,10 +177,9 @@ class KNasEAIndividual:
 		inch= lastLayerOutCh * (inputDimension**2)
 		och= list(self.dfcLayer)[0].out_features
 		self.dfcLayer = Sequential( *([Linear(inch,och)] + list(self.dfcLayer[1:] )) ).to('cuda')
-		# self.dfcLayer.apply(self.weight_reset)
+		
 
-		
-		
+		# self.dfcLayer.apply(self.weight_reset)
 		# list(self.dfcLayer)[0].in_features = lastLayerOutCh * (inputDimension**2)
 
 
@@ -338,7 +350,7 @@ class KNasEA:
 		self.mutRemProb = 1
 
 		# Mutation add operations
-		self.mutAddBatchNorm = 0.1
+		self.mutAddBatchNorm = 12
 		self.mutAddAcFunc = 0.1
 		self.mutAddDropout = 0.1
 		self.mutAddMaxPool = 0.1
@@ -579,7 +591,11 @@ class KNasEA:
 					
 					# Adding batch norm only if it does not exist
 					if ( addOp == "addBatch" ) and (components[1]==None):
-						pass
+
+						# Number of filters in conv2d componendt
+						filterCount = components[0].out_channels
+						
+						components[1] = BatchNorm2d(filterCount)
 
 					# Adding activation function only if it does not exist
 					elif ( addOp == "addAf" ) and (components[2]==None):

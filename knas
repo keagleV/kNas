@@ -5,11 +5,8 @@ from knasConfFile import KNasConfFile
 from knasDataset import KnasDatasetKmnist
 from knasModel import KNasModel
 from knasEA import KNasEA
-
 from argparse import ArgumentParser
-
 from random import choices
-
 from os import path
 
 
@@ -161,8 +158,11 @@ class KNas:
 		# Population size
 		popSize = len(population)
 
+
 		# Evaluating the initial population
 		population = self.eaAlgo.knasea_calculate_fitness(population)
+
+
 
 
 

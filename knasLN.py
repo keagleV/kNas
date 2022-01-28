@@ -9,7 +9,7 @@ from torch.nn import Sequential
 from torch.nn import Dropout
 from torch.nn import Flatten
 from torch.nn import BatchNorm2d
-
+from torch.nn import BatchNorm1d
 
 
 
@@ -65,12 +65,12 @@ class CNLayer():
 							)
 
 		# Check for the batchnorm
-		# if self.batchNorm!=None:
-		#	numLearnParams+=1
-		# 	listOfModules.append(BatchNorm2d(self.batchNorm))
+		if self.batchNorm!=None:
+			numLearnParams+=1
+			listOfModules.append(BatchNorm2d(self.out_channels))
+
 
 		# Check for the activation function
-
 		if self.activationFunc:
 
 			numLearnParams+=1
@@ -169,9 +169,9 @@ class DFCLayer():
 			listOfModules.append(Linear(self.in_channels,self.fhiNeurons))
 
 			# Check for the batch norm
-			# if self.fhiBatchNorm!=None:
-			#	numLearnParams+=1
-			# 	listOfModules.append(BatchNorm2d(self.fhiBatchNorm))
+			if self.fhiBatchNorm!=None:
+				numLearnParams+=1
+				listOfModules.append(BatchNorm1d(self.fhiNeurons))
 
 			# Check for the activation function
 			if self.fhiActivationFunc:
@@ -194,7 +194,6 @@ class DFCLayer():
 
 
 			# Checking the second hidden layer
-
 			if self.secNeurons:
 
 				# Set the last layer neuron count
@@ -208,9 +207,9 @@ class DFCLayer():
 				listOfModules.append(Linear(self.fhiNeurons,self.secNeurons))
 
 				# Check for the batch norm
-				# if self.secBatchNorm!=None:
-				#	numLearnParams+=1
-				# 	listOfModules.append(BatchNorm2d(self.secBatchNorm))
+				if self.secBatchNorm!=None:
+					numLearnParams+=1
+					listOfModules.append(BatchNorm1d(self.secNeurons))
 
 				# Check for the activation function
 				if self.secActivationFunc:
@@ -263,7 +262,6 @@ class KNasLayersNet(Module):
 		
 	def forward(self, x):
 
-
 		# Forward the data through the CN layers
 		for cnnLayer in self.cnnLayers:
 			x=cnnLayer(x)
@@ -271,6 +269,8 @@ class KNasLayersNet(Module):
 
 		x= x.view(x.size(0),-1)
 
+
+		self.dfcLayer(x)
 
 		# Forward the data through the last layer, the dfc layer
 		return self.dfcLayer(x)
