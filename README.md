@@ -1,12 +1,13 @@
 # kNas
-
-
-## Description
+These days with fast development of deep learning, the need to design an appropriate network structure has become an issue.
+In recent years, Neural Architecture Search (NAS) has shown a great success in design such networks and has automated and replaced
+human experts with computer algorithms successfully. kNas is a program that has implemented NAS and uses evolutionary methods
+to search for best network structure.
 
 
 ### Dependencies
 
-* OS: Windows/Linux
+* OS: Linux
 * Python3.8 or later
 
 ### Installing
@@ -24,10 +25,29 @@ echo  PATH=$PATH:$PWD >>  $HOME/.bashrc
 cd dist
 pip3 install knas-1.0.tar.gz
 ```
+### Files descriptions
+
+| Filename     |  Description
+| ------------- |  --------------   
+| `knas`        |   The main executing program
+| `knasConfFile` |  Defines the methods to parse the configuration file 
+| `knasDataset.py` |  Defines the methods to download/load the necessary datasets 
+| `knasEA.py` |  Defines the evolutionary operations to be performed on NAS problem
+| `knasLN.py` |  Defines the methods to create training model, convolutional and dense layers
+| `knasLogging` |  Defines the methods to log messages to the console for the KNAS program
+| `knasModel.py` |  Defines the methods to train a created model
+| `knasModelLogging.py` |  Defines the methods to log messages to the console for the model training 
+| `knasModelLogging.py` |  Defines the methods to log messages to the console for the model training 
+| `Samples/knas.conf`| A configuration file sample
+
 
 
 ### Executing program
+To execute the program, first create a configuration file same as the one in the Samples directory. After creating the configration file, execute:
 
+```
+knas -f PATH_TO_YOUR_CONF_FILE
+```
 
 ## Help
 
