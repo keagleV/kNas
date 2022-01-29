@@ -93,7 +93,7 @@ class KNasModel:
 
 		
 		# Creating the model
-		model = KNasLayersNet( 1, cnnLayers , dfcLayer).to(device)		
+		model = KNasLayersNet( cnnLayers , dfcLayer).to(device)		
 
 		
 		# For debug case, print the layers in an individual

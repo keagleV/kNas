@@ -177,12 +177,17 @@ class KNas:
 		# the highest fitness value
 
 		print("EA Finished")
-		print("Report: .... ")
+		print("Report: .... \n\n")
+
+
+		print("Learning rate: ",bestIndividual.learningRate)
+
 
 		# Best individual
 		bestIndividual = population[0]
 
 		print("CN Layers: ")
+		print("----------------\n")
 		for layer in bestIndividual.cnLayersList:
 			print(layer)
 
@@ -191,7 +196,8 @@ class KNas:
 		print(bestIndividual.dfcLayer)
 
 
-		print("Performance staus ...")
+
+		print("\n\nPerformance staus ...")
 		for k,v in bestIndividual.performanceStatus.items():
 			print(k,v)
 

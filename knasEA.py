@@ -72,32 +72,18 @@ class KNasEAIndividual:
 		# DFC layer, the only layer in the last part of the network
 		self.dfcLayer=None
 
-		# Device to be used to create the layers of this individual
-		self.device = knasParams['DEVICE']
-
 		# KNAS parmaeters
 		self.knasParams = knasParams
 
 		# Learning rate
 		self.learningRate = float()
 
-		# Input dimenesion: 1 * dim * dim 
-		self.inputDimension = knasParams['INPUT_DIM']
-
-		# Possible values for the filter count
-		self.filterPossValues = knasParams['FILTER_POSS_VALUES']
-
-		# Possible values for the batch norm
-		self.batchNormMaxValue = 100
-
 		# Possible values for the activation function
 		self.actFuncPossValues = ['relu','sigmoid']
 
-		# Possible values for the dfc hidden layer neurons
-		self.dfcHiLaPossNeuronValues = knasParams['HIDDEN_LAYERS_NEURONS_POSS_VALUE']
 
 
-		self.create_random_individual(knasParams['MAX_CNN'],knasParams['KERNEL_SIZE'],knasParams['PADDING'],knasParams['STRIDE'])
+		self.create_random_individual()
 
 
 
@@ -110,7 +96,7 @@ class KNasEAIndividual:
 		
 
 		# Input dimension to calculate the output size of the cn layers
-		inputDimension = self.inputDimension
+		inputDimension = self.knasParams['INPUT_DIM']
 
 		# Number of output channels in the last cnn layer
 		lastLayerOutCh = 0 
@@ -167,7 +153,7 @@ class KNasEAIndividual:
 				finalComps+=list(l)[1:]
 
 
-			self.cnLayersList[i]= Sequential(*finalComps).to(self.device)
+			self.cnLayersList[i]= Sequential(*finalComps).to(self.knasParams['DEVICE'])
 
 			# Updating the last layer output channel
 			lastLayerOutCh = list(self.cnLayersList[i])[0].out_channels
@@ -202,17 +188,18 @@ class KNasEAIndividual:
 			dfcLayerComonents.append(com)
 		
 		
-		self.dfcLayer = Sequential(*dfcLayerComonents).to(self.device)
+		self.dfcLayer = Sequential(*dfcLayerComonents).to(self.knasParams['DEVICE'])
 
 
 
-	def create_random_individual(self,maxCNLayers , kernelSize , padding , stride):
+	def create_random_individual(self):
 		'''
 			This function creates a random individual
 		'''
 
+
 		# Input dimension to calculate the output size
-		inputDimension = self.inputDimension
+		inputDimension = self.knasParams['INPUT_DIM']
 
 
 		# Setting the leraning rate
@@ -220,7 +207,7 @@ class KNasEAIndividual:
 		
 
 		# Decide on number of the CN layers
-		self.cnLayersCount = randint(1,maxCNLayers)
+		self.cnLayersCount = randint(1,self.knasParams['MAX_CNN'])
 
 
 		# Creating CN Layers
@@ -232,7 +219,7 @@ class KNasEAIndividual:
 
 
 			# Number of filters in this layer
-			currLaFilterCnt = choice(self.filterPossValues)
+			currLaFilterCnt = choice(self.knasParams['FILTER_POSS_VALUES'])
 			
 			'''
 			 In the case of having convolutional layer, 
@@ -246,10 +233,10 @@ class KNasEAIndividual:
 				
 			'''
 			
-			inputDimension = ( (inputDimension - kernelSize + 2*padding )// stride ) + 1
+			inputDimension = ( (inputDimension - self.knasParams['KERNEL_SIZE'] + 2* self.knasParams['PADDING'] )// self.knasParams['STRIDE'] ) + 1
 
 			# Batch norm value
-			batchNorm = choice([randint(1,self.batchNormMaxValue),None])
+			batchNorm = choice([ True ,None])
 
 			# Activation function value
 			actFunction= choice([ *self.actFuncPossValues , None ])
@@ -258,15 +245,15 @@ class KNasEAIndividual:
 			dropout = choice ([random(),None])
 
 			# Maxpool value
-			maxPool = choice([ kernelSize , None ])
+			maxPool = choice([ self.knasParams['KERNEL_SIZE'] , None ])
 
 			# If we have maxpooling , we divide the dimension
 			if maxPool:
-				inputDimension = inputDimension // kernelSize 
+				inputDimension = inputDimension // self.knasParams['KERNEL_SIZE'] 
 
 
 			# Adding a new CN layer to the previous layers
-			numLearnParams,cnLayer = CNLayer(lastLayerOutCh,currLaFilterCnt,kernelSize,padding,stride,batchNorm,actFunction,dropout,maxPool,self.knasParams).create_cn_layer()
+			numLearnParams,cnLayer = CNLayer(lastLayerOutCh,currLaFilterCnt,self.knasParams['KERNEL_SIZE'],self.knasParams['PADDING'],self.knasParams['STRIDE'],batchNorm,actFunction,dropout,maxPool,self.knasParams).create_cn_layer()
 		
 			# Adding the learnable parameters count
 			self.numLearnParams += numLearnParams
@@ -293,14 +280,14 @@ class KNasEAIndividual:
 			# We have to create at least 1 layer until this moment
 
 
-			fhNumOfNeurons = choice(self.dfcHiLaPossNeuronValues)
+			fhNumOfNeurons = choice(self.knasParams['HIDDEN_LAYERS_NEURONS_POSS_VALUE'])
 
 			# Increment learnable params for the number of first hidden layer neurons
 			self.numLearnParams+=1
 
 
 			# Batch norm value
-			fhBatchNorm = choice([randint(1,self.batchNormMaxValue),None])
+			fhBatchNorm = choice( [True ,None])
 
 
 			# Activation function value
@@ -318,13 +305,13 @@ class KNasEAIndividual:
 			else:
 
 				# Creating parameters for the second layer
-				secNumOfNeurons = choice(self.dfcHiLaPossNeuronValues)
+				secNumOfNeurons = choice(self.knasParams['HIDDEN_LAYERS_NEURONS_POSS_VALUE'])
 
 				# Increment learnable params for the number of first hidden layer neurons
 				self.numLearnParams+=1
 
 				# Batch norm value
-				secBatchNorm = choice([randint(1,self.batchNormMaxValue),None])
+				secBatchNorm = choice([ True ,None])
 
 
 				# Activation function value
@@ -337,6 +324,7 @@ class KNasEAIndividual:
 
 				# Creating the dfc layer
 				numLearnParams,self.dfcLayer= DFCLayer( lastLayerOutCh * (inputDimension**2) ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,secNumOfNeurons,secBatchNorm,secActFunction,secDropout,self.knasParams).create_dfc_layer()
+				
 				self.numLearnParams += numLearnParams
 	
 
@@ -359,6 +347,9 @@ class KNasEA:
 
 		# Crossover probability
 		self.crossProb= knasParams['CROSS_PROB']
+
+		# DFC layer crossover proability
+		self.crossSwapDfcProb = knasParams['CROSS_SWAP_DFC_PROB']
 
 		# Mutation probability for cn layer
 		self.mutProbCl = knasParams['MUT_PROB_CL']
@@ -420,6 +411,7 @@ class KNasEA:
 		self.mutRemBatchNormDl = knasParams['MUT_REM_BATCHNORM_PROB_DL']
 		self.mutRemAcFuncDl = knasParams['MUT_REM_ACTFUNC_PROB_DL']
 		self.mutRemDropoutDl = knasParams['MUT_REM_DROPOUT_PROB_DL']
+
 
 
 		# KNAS parameters for later usage
@@ -587,7 +579,7 @@ class KNasEA:
 	
 
 			# Swapping dfc layers with a specific probability
-			if random() <= self.knasParams["CROSS_SWAP_DFC_PROB"]:
+			if random() <= self.crossSwapDfcProb:
 				
 				ind1.dfcLayer,ind2.dfcLayer=ind2.dfcLayer,ind1.dfcLayer
 

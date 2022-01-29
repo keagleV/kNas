@@ -335,7 +335,7 @@ class KNasLayersNet(Module):
 		This class has implemented the convultional layer of the KNAS program
 	'''
 
-	def __init__(self, numChannels,cnnLayers,dfcLayer):
+	def __init__(self,cnnLayers,dfcLayer):
 		# call the parent constructor
 		super(KNasLayersNet, self).__init__()
 
