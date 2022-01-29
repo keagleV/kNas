@@ -14,6 +14,8 @@ from torch.nn import Sequential
 from torch.nn import Dropout
 from torch.nn import Flatten
 from torch.nn import BatchNorm2d
+from torch.nn import BatchNorm1d
+
 from random import randint
 from random import choice
 from random import choices
@@ -73,6 +75,9 @@ class KNasEAIndividual:
 		# Device to be used to create the layers of this individual
 		self.device = knasParams['DEVICE']
 
+		# KNAS parmaeters
+		self.knasParams = knasParams
+
 		# Learning rate
 		self.learningRate = float()
 
@@ -93,11 +98,6 @@ class KNasEAIndividual:
 
 
 		self.create_random_individual(knasParams['MAX_CNN'],knasParams['KERNEL_SIZE'],knasParams['PADDING'],knasParams['STRIDE'])
-
-
-	# def weight_reset(self,m):
-	# 	if isinstance(m, Conv2d) or isinstance(m, Linear):
-	# 		m.reset_parameters()
 
 
 
@@ -174,13 +174,35 @@ class KNasEAIndividual:
 
 
 		# Setting the dfc layer's input channel
-		inch= lastLayerOutCh * (inputDimension**2)
-		och= list(self.dfcLayer)[0].out_features
-		self.dfcLayer = Sequential( *([Linear(inch,och)] + list(self.dfcLayer[1:] )) ).to(self.device)
-		
+		dfcLayerComonents = []
 
-		# self.dfcLayer.apply(self.weight_reset)
-		# list(self.dfcLayer)[0].in_features = lastLayerOutCh * (inputDimension**2)
+
+		# Calculating the input and output features of the dfc layer
+		ifeatures= lastLayerOutCh * (inputDimension**2)
+		ofeatures= list(self.dfcLayer)[0].out_features
+
+		# Adding the first component of the dfc layer
+		dfcLayerComonents.append(Linear(ifeatures,ofeatures))
+
+
+		# Number of output features of the last linear component
+		lastLinFeat = ofeatures
+		
+		# Make the features compatiable between each layer
+		for com in list(self.dfcLayer)[1:]:
+			
+			if isinstance(com,Linear):
+
+				# Curret component output feature
+				currOf = com.out_features
+				com = Linear(lastLinFeat , currOf)
+				lastLinFeat = currOf
+
+			
+			dfcLayerComonents.append(com)
+		
+		
+		self.dfcLayer = Sequential(*dfcLayerComonents).to(self.device)
 
 
 
@@ -244,12 +266,12 @@ class KNasEAIndividual:
 
 
 			# Adding a new CN layer to the previous layers
-			numLearnParams,cnLayer = CNLayer(lastLayerOutCh,currLaFilterCnt,kernelSize,padding,stride,batchNorm,actFunction,dropout,maxPool).create_cn_layer()
+			numLearnParams,cnLayer = CNLayer(lastLayerOutCh,currLaFilterCnt,kernelSize,padding,stride,batchNorm,actFunction,dropout,maxPool,self.knasParams).create_cn_layer()
 		
 			# Adding the learnable parameters count
 			self.numLearnParams += numLearnParams
 			
-			self.cnLayersList.append(cnLayer.to(self.device))
+			self.cnLayersList.append(cnLayer)
 	
 			# Updating the last layer output channel
 			lastLayerOutCh = currLaFilterCnt
@@ -264,8 +286,7 @@ class KNasEAIndividual:
 
 
 		if numOfHiddenLayers==0:
-			numLearnParams,self.dfcLayer= DFCLayer( lastLayerOutCh * (inputDimension**2)  ,10,None,None,None,None,None,None,None,None).create_dfc_layer()
-			self.dfcLayer = self.dfcLayer.to(self.device)
+			numLearnParams,self.dfcLayer= DFCLayer( lastLayerOutCh * (inputDimension**2)  ,10,None,None,None,None,None,None,None,None,self.knasParams).create_dfc_layer()
 			self.numLearnParams+=numLearnParams
 		else:
 
@@ -292,8 +313,7 @@ class KNasEAIndividual:
 
 			# We only have one hidden layer
 			if numOfHiddenLayers==1:
-				numLearnParams,self.dfcLayer= DFCLayer(lastLayerOutCh * (inputDimension**2)  ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,None,None,None,None).create_dfc_layer()
-				self.dfcLayer = self.dfcLayer.to(self.device)
+				numLearnParams,self.dfcLayer= DFCLayer(lastLayerOutCh * (inputDimension**2)  ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,None,None,None,None,self.knasParams).create_dfc_layer()
 				self.numLearnParams += numLearnParams
 			else:
 
@@ -316,8 +336,7 @@ class KNasEAIndividual:
 
 
 				# Creating the dfc layer
-				numLearnParams,self.dfcLayer= DFCLayer( lastLayerOutCh * (inputDimension**2) ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,secNumOfNeurons,secBatchNorm,secActFunction,secDropout).create_dfc_layer()
-				self.dfcLayer = self.dfcLayer.to(self.device)
+				numLearnParams,self.dfcLayer= DFCLayer( lastLayerOutCh * (inputDimension**2) ,10,fhNumOfNeurons,fhBatchNorm,fhActFunction,fhDropout,secNumOfNeurons,secBatchNorm,secActFunction,secDropout,self.knasParams).create_dfc_layer()
 				self.numLearnParams += numLearnParams
 	
 
@@ -350,7 +369,7 @@ class KNasEA:
 		self.mutRemProb = knasParams['MUT_REM_PROB']
 
 		# Mutation add operations
-		self.mutAddCnLayer = 12
+		self.mutAddCnLayer = 0.3
 		self.mutAddBatchNorm = knasParams['MUT_ADD_BATCHNORM_PROB']
 		self.mutAddAcFunc = knasParams['MUT_ADD_ACTFUNC_PROB']
 		self.mutAddDropout = knasParams['MUT_ADD_DROPOUT_PROB']
@@ -534,16 +553,26 @@ class KNasEA:
 	
 	
 
+
+
 	def knasea_mutation(self,ind):
 		'''
 			This function will perform the mutation method on the 
 			offspring created from the crossover phase
 		'''
 
+		'''
+
+			Performing mutatin of the CN layers
+
+		'''
+
+
 		# List of new layers after mutation
-		newLayers = []
+		cnNewLayers = []
 
 
+		# Performing mutation of CN layers
 		for l in ind.cnLayersList:
 
 			listl = list(l)
@@ -577,7 +606,7 @@ class KNasEA:
 							ind.numLearnParams += numLearnParams
 
 							# Adding the new layer to the list
-							newLayers.append(newCnLayer)
+							cnNewLayers.append(newCnLayer)
 
 
 						# Setting the add operation for the layer we choosed in the iteration
@@ -593,9 +622,7 @@ class KNasEA:
 							components[0] = com
 						elif isinstance(com,BatchNorm2d):
 							components[1] = com
-						elif isinstance(com,ReLU):
-							components[2] = com
-						elif isinstance(com,Sigmoid):
+						elif isinstance(com,ReLU) or isinstance(com,Sigmoid):
 							components[2] = com
 						elif isinstance(com,Dropout):
 							components[3] = com
@@ -631,12 +658,6 @@ class KNasEA:
 					# Removing the None objects from the components list and
 					# updating the listl list
 					listl = [com for com in components if com!=None]
-
-
-
-
-
-
 
 
 
@@ -733,11 +754,203 @@ class KNasEA:
 								listl.remove(com)
 								break
 
-				newLayers.append(Sequential(*listl))
+				cnNewLayers.append(Sequential(*listl))
+
+
+		
+
+
+		'''
+
+			Performing mutatin of the DFC layer
+
+		'''
+
+
+
+		# First we decompose the layers in the dfc layer, decomposing is
+		# done by counting number of Linear layers. As we encounter a Linear 
+		# layer in the iteration, we save the previous ones as a one sequential
+
+		dfcLayers = []
+
+		# This is temporary list which stores the layer's components, we
+		# initialize it with the first Linear component of the DFC layer
+		dfcLayersTmp = [ list(ind.dfcLayer)[0] ]
+
+		for com in list(ind.dfcLayer)[1:]:
+
+			if isinstance(com,Linear):
+
+				# Adding the previous layer
+				dfcLayers.append(Sequential(*dfcLayersTmp))
+
+				# New Linear component is the start of the next layer
+				dfcLayersTmp=[com]
+
+			else:
+				dfcLayersTmp.append(com)
+
+
+		# List of new layers after mutation
+		dfcNewLayers = []
+
+
+		for l in dfcLayers:
+			
+			listl = list(l)
+
+			if random() < self.mutProb:
+
+				# Decide on the type of operation
+				op = choices(["add","mod","rem"],weights=[self.mutAddProb,self.mutModProb,self.mutRemProb],k=1)[0]
+				
+
+				if op=="add":
+
+					# Decide on the type of add operation
+					addOp =  choices(["addHiLayer","addBatch","addAf","addDr"],weights=[self.mutAddCnLayer,self.mutAddBatchNorm,self.mutAddAcFunc,self.mutAddDropout],k=1)[0]
+					
+					# Adding a new hidden layer
+					if (addOp=="addHiLayer"):
+
+						# Check for the maximum number of layers constraint
+						# Add only if there is space to add
+						if len(ind.dfcLayers) < self.knasParams["MAX_CNN"]:
+
+							# Creating a random DFC layer, by only sending the
+							# parameters of KNAS
+
+							numLearnParams,newDFCLayer = DFCLayer(None,None,None,None,None,None,None,
+											None,None,None,self.knasParams).create_random_dfc_layer()
+
+							# Adding number of learnable parameters of this new layer to the individual
+							ind.numLearnParams += numLearnParams
+
+							# Adding the new layer to the list
+							dfcNewLayers += list(newDFCLayer)
+
+
+						# Setting the add operation for the layer we choosed in the iteration
+						addOp =  choices(["addBatch","addAf","addDr","addMax"],weights=[self.mutAddBatchNorm,self.mutAddAcFunc,self.mutAddDropout,self.mutAddMaxPool],k=1)[0]
+
+
+
+					# Possible components of the given dfc layer
+					components = [None]*4
+
+					for com in listl:
+						if isinstance(com,Linear):
+							components[0] = com
+						elif isinstance(com,BatchNorm1d):
+							components[1] = com
+						elif isinstance(com,ReLU) or isinstance(com,Sigmoid):
+							components[2] = com
+						elif isinstance(com,Dropout):
+							components[3] = com
+					
+					# Adding batch norm only if it does not exist
+					if ( addOp == "addBatch" ) and (components[1]==None):
+						# Number of filters in conv2d componendt
+						filterCount = components[0].out_channels
+						
+						components[1] = BatchNorm1d(filterCount)
+
+					# Adding activation function only if it does not exist
+					elif ( addOp == "addAf" ) and (components[2]==None):
+						# Randomly choose an activation function
+						components[2] = choice([ReLU(),Sigmoid()])
+
+					# Adding dropout only if it does not exist
+					elif ( addOp == "addDr") and (components[3]==None):
+						print("Add dr")
+						
+						# Adding a random dropout object
+						components[3] = Dropout(random())
+						
+					# Removing the None objects from the components list and
+					# updating the listl list
+					listl = [com for com in components if com!=None]
+
+
+				elif op == "mod":
+
+					# Decide on the type of modify operation
+					modOp =  choices(["modAf","modDr","modFil"],weights=[self.mutModAcFunc,self.mutModDropout,self.mutModFilters],k=1)[0]
+
+					if modOp == "modAf":
+
+						# Switching the activation function instance in the sequential
+						for i,com in enumerate(listl):
+							if isinstance(com,Sigmoid):
+								listl[i] = ReLU()
+								break
+							elif isinstance(com,ReLU):
+								listl[i]= Sigmoid()
+								break
+
+
+					elif modOp == "modDr":
+
+						# Modifying the dropout probability instance in the sequential
+						for i,com in enumerate(listl):
+							
+							if isinstance(com,Dropout):
+								
+								# Creating new instance
+								listl[i]= Dropout(random())
+								break
+
+					elif modOp == "modFil":
+						# Number of filters to be set
+						numFilters = choice(self.knasParams['HIDDEN_LAYERS_NEURONS_POSS_VALUE'])
+
+						# Parameters of current Linear
+						inputChannels = listl[0].in_features
+
+						listl[0]= Linear(inputChannels, numFilters )
+							
+
+				elif op=="rem":
+
+					# Decide on the type of remove operation
+					remOp =  choices(["remHiLayer","remBatch","remAf","remDr"],weights=[self.mutRemCnLayer,self.mutRemBatchNorm,self.mutRemAcFunc,self.mutRemDropout],k=1)[0]
+
+					# Removing a hidden layer
+					if remOp == "remHiLayer":
+						continue
+
+					elif remOp == "remBatch":
+						# Removing the BatchNorm2d instance in the sequential
+						for com in listl:
+							if isinstance(com,BatchNorm2d):
+								listl.remove(com)
+								break
+
+
+					elif remOp == "remAf":
+						# Removing the activation function instance in the sequential
+						for com in listl:
+							if isinstance(com,Sigmoid) or isinstance(com,ReLU):
+								listl.remove(com)
+								break
+						
+
+					elif remOp == "remDr":
+						# Removing the dropout instance in the sequential
+						for com in listl:
+							if isinstance(com,Dropout):
+								listl.remove(com)
+								break
+
+					
+
+				dfcNewLayers+= listl
 
 
 		# Updating the cn layers of the individual
-		ind.cnLayersList = newLayers
+		ind.cnLayersList = cnNewLayers
+		ind.dfcLayer = Sequential(*(dfcNewLayers+dfcLayersTmp))
 
 		return ind
 

@@ -51,7 +51,7 @@ class CNLayer():
 			This function will create a random cn layer
 		'''
 
-		self.in_channels= randint(1,max(self.knasParams['FILTER_POSS_VALUES']))
+		self.in_channels= 1
 		
 		self.out_channels= choice(self.knasParams['FILTER_POSS_VALUES'])
 		
@@ -130,7 +130,7 @@ class CNLayer():
 			listOfModules.append(MaxPool2d(kernel_size=(self.maxPoolKernelSize,self.maxPoolKernelSize)))
 
 		# Returning the sequence of the modules in the layer
-		return (numLearnParams, Sequential(*listOfModules))
+		return (numLearnParams, Sequential(*listOfModules).to(self.knasParams["DEVICE"]))
 
 
 class DFCLayer():
@@ -139,7 +139,7 @@ class DFCLayer():
 	'''
 	def __init__(self,in_channels,out_channels,fhiNeurons,fhiBatchNorm,
 						fhiActivationFunc,fhiDropoutProb,secNeurons,secBatchNorm,
-						secActivationFunc,secDropoutProb):
+						secActivationFunc,secDropoutProb,knasParams=None):
 
 		self.in_channels= in_channels
 		
@@ -163,6 +163,42 @@ class DFCLayer():
 
 		self.secDropoutProb = secDropoutProb
 
+
+		# KNAS parameters for creating random layer
+		self.knasParams = knasParams
+
+
+	def create_random_dfc_layer(self):
+		'''
+			This function will create a random dfc layer
+		'''
+
+		self.in_channels= 1
+		
+		self.out_channels= choice(self.knasParams['HIDDEN_LAYERS_NEURONS_POSS_VALUE'])
+
+		self.fhiNeurons= choice(self.knasParams['HIDDEN_LAYERS_NEURONS_POSS_VALUE']+[None])
+
+		self.fhiBatchNorm= choice([True , False]) 
+
+		self.fhiActivationFunc = choice(["relu", 'sigmoid',None])
+
+		self.fhiDropoutProb = choice([random(),None])
+
+
+
+		self.secNeurons= choice(self.knasParams['HIDDEN_LAYERS_NEURONS_POSS_VALUE']+[None])
+
+		self.secBatchNorm= choice([True , False]) 
+
+		self.secActivationFunc = choice(["relu", 'sigmoid',None])
+
+		self.secDropoutProb = choice([random(),None])
+
+
+
+
+		return self.create_dfc_layer()
 
 
 	def create_dfc_layer(self):
@@ -273,7 +309,7 @@ class DFCLayer():
 
 
 		# Returning the sequence of the modules in the layer
-		return (numLearnParams,Sequential(*listOfModules))
+		return (numLearnParams,Sequential(*listOfModules).to(self.knasParams["DEVICE"]))
 
 
 class KNasLayersNet(Module):

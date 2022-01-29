@@ -137,6 +137,7 @@ class KNas:
 
 			off1.make_individual_valid()
 
+
 			off2 = self.eaAlgo.knasea_mutation(off2)
 			# Make the offspring a valid offspring
 			off2.make_individual_valid()

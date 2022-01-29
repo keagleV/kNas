@@ -36,7 +36,7 @@ class KNasConfFile:
 		self.splitSeedr = '\s*SPLIT_SEED\s*=\s*[1-9][0-9]*\s*'
 
 		# Population size
-		self.popSizer = '\s*POP_SIZE\s*=\s*\d*[02468]\s*'
+		self.popSizer = '\s*POP_SIZE\s*=\s[1-9][0-9]*\s*'
 
 		# Generation evolution count
 		self.genNumr = '\s*GEN_NUM\s*=\s*[1-9][0-9]*\s*'
@@ -179,9 +179,6 @@ class KNasConfFile:
 				elif match(self.popSizer,line):
 					parameters['POP_SIZE']= int(line.split("=")[1].strip())
 					
-					# Pop size cannot be zero
-					if parameters['POP_SIZE']==0:
-						return None,lineNum 
 				elif match(self.genNumr,line):
 					parameters['GEN_NUM']= int(line.split("=")[1].strip())
 
