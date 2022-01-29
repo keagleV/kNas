@@ -21,7 +21,6 @@ from random import random
 from statistics import mean
 
 
-
 class KNasEALogging():
 	'''
 		This class has implemented the logging operations for the EA
@@ -246,12 +245,12 @@ class KNasEAIndividual:
 
 			# Adding a new CN layer to the previous layers
 			numLearnParams,cnLayer = CNLayer(lastLayerOutCh,currLaFilterCnt,kernelSize,padding,stride,batchNorm,actFunction,dropout,maxPool).create_cn_layer()
-			
+		
 			# Adding the learnable parameters count
 			self.numLearnParams += numLearnParams
 			
 			self.cnLayersList.append(cnLayer.to(self.device))
-			
+	
 			# Updating the last layer output channel
 			lastLayerOutCh = currLaFilterCnt
 			
@@ -400,7 +399,6 @@ class KNasEA:
 		for i in range(self.popSize):
 			population.append(KNasEAIndividual(self.knasParams))
 
-
 		return population
 
 
@@ -419,26 +417,19 @@ class KNasEA:
 
 			# Setting the performance status of the individual
 			ind.performanceStatus = performanceStatus
-			# Calcualting the fitness value based on the performance status
+			
 
+			# Calcualting the fitness value based on the performance status
 
 			# Calculating the mean values of epochs
 			meanTrainDuration = mean(performanceStatus['training_time'])
 
-			meanTrainAcc = mean(performanceStatus['train_acc'])
-
-			meanTrainLoss = mean(performanceStatus['train_loss'])
-
 			meanValAcc= mean(performanceStatus['val_acc'])
-
-			meanValLoss= mean(performanceStatus['val_loss'])
 
 			meanTestAcc= mean(performanceStatus['test_acc'])
 
-			meanTestLoss= mean(performanceStatus['test_loss'])
-
 			# Setting the fitness value
-			ind.fitnessVal = meanTestAcc
+			ind.fitnessVal = meanTestAcc + 1/(abs(meanValAcc - meanTestAcc )+1) + 1/meanTrainDuration + 1/ind.numLearnParams
 
 
 

@@ -8,7 +8,7 @@ from knasEA import KNasEA
 from argparse import ArgumentParser
 from random import choices
 from os import path
-
+from torch import cuda
 
 class KNas:
 	'''
@@ -76,6 +76,13 @@ class KNas:
 		self.knasParams=val
 
 
+		# If the device has been set as cuda, but the system does not support it, change the 
+		# device to cpu
+		if ( not cuda.is_available() ) and ( self.knasParams["DEVICE"] == "cuda"):
+				self.logModHand.knas_log_message(self.logModHand.loggingCodes['CUDA_DEVICE_SWITCH'],'INF')
+				self.knasParams["DEVICE"] = "cpu"
+
+
 	def start_evaluation(self):
 		'''
 			This is the main function of the KNAS program. This will start the
@@ -89,13 +96,12 @@ class KNas:
 		# Initial population of the process
 		population=self.eaAlgo.knasea_generate_initial_population()
 
-
 		# Population size
 		popSize = len(population)
 
 
 		# Evaluating the initial population
-		population = self.eaAlgo.knasea_calculate_fitness(population)
+		# population = self.eaAlgo.knasea_calculate_fitness(population)
 
 
 

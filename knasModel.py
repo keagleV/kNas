@@ -4,7 +4,6 @@ from torch import float as tfloat
 from torch import cuda
 from torch.optim import Adam
 from torch.nn import CrossEntropyLoss
-from torch import cuda
 from torch import no_grad
 from time import time
 
@@ -92,6 +91,7 @@ class KNasModel:
 		if cuda.is_available() and (device!="cuda"):
 				self.logModHand.knas_log_message(self.logModHand.loggingCodes['CUDA_AVAILABLE'],'INF')
 
+		
 
 		# Creating the model
 		model = KNasLayersNet( 1, cnnLayers , dfcLayer).to(device)		

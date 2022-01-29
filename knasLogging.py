@@ -15,6 +15,8 @@ class KNasLogging:
 
 			'CUDA_AVAILABLE': 'CUDA Is Supported',
 
+			'CUDA_DEVICE_SWITCH': 'CUDA Not Available, Switching To CPU',
+
 			'MODEL_TRAINING_STARTED': 'Training Of The Model Has Been Started',
 
 			'MODEL_TRAINING_FINISHED': 'Training Of The Model Finished'

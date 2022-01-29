@@ -14,7 +14,7 @@ class KNasModelLogging:
 			'CONFIG_FILE_DEF_ERR': 'Config File Definition Error',
 
 			'CUDA_AVAILABLE': 'CUDA Is Supported',
-
+			
 			'MODEL_TRAINING_STARTED': 'Training Of The Model Has Been Started',
 
 			'MODEL_TRAINING_FINISHED': 'Training Of The Model Finished'
