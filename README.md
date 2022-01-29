@@ -49,6 +49,12 @@ To execute the program, first create a configuration file same as the one in the
 knas -f PATH_TO_YOUR_CONF_FILE
 ```
 
+## Future work
+Due to lack of time to learn more about PyTorch and its structure, EA methods use object creation instead of object modifiction in both
+modification and creation phase. So, in order to do better, the object modification possibility rather than creating new, will be added.
+
+
+
 ## Help
 
 For any help through using this family, you can use -h or --help command line option to get help about that specific program.
