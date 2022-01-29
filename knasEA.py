@@ -208,7 +208,7 @@ class KNasEAIndividual:
 
 	def create_random_individual(self,maxCNLayers , kernelSize , padding , stride):
 		'''
-			This function creates a random indivi
+			This function creates a random individual
 		'''
 
 		# Input dimension to calculate the output size
@@ -360,31 +360,31 @@ class KNasEA:
 		# Crossover probability
 		self.crossProb= knasParams['CROSS_PROB']
 
-		# Mutation probability
+		# Mutation probability for cn layer
 		self.mutProbCl = knasParams['MUT_PROB_CL']
 
-		# Learning rate mutation
+		# Learning rate mutation for cn layer
 		self.mutLearningRate = knasParams['MUT_LEARNING_RATE_PROB']
 
-		# Mutation opearations probabilities
+		# Mutation opearations probabilities for cn layer
 		self.mutAddProbCl = knasParams['MUT_ADD_PROB_CL']
 		self.mutModProbCl = knasParams['MUT_MOD_PROB_CL']
 		self.mutRemProbCl = knasParams['MUT_REM_PROB_CL']
 
-		# Mutation add operations
+		# Mutation add operations for cn layer
 		self.mutAddCnLayer = knasParams['MUT_ADD_CN_LAYER']
 		self.mutAddBatchNormCl = knasParams['MUT_ADD_BATCHNORM_PROB_CL']
 		self.mutAddAcFuncCl = knasParams['MUT_ADD_ACTFUNC_PROB_CL']
 		self.mutAddDropoutCl = knasParams['MUT_ADD_DROPOUT_PROB_CL']
 		self.mutAddMaxPoolCl = knasParams['MUT_ADD_MAXPOOL_PROB_CL']
 
-		# Mutation modify operations
+		# Mutation modify operations for cn layer
 		self.mutModAcFuncCl = knasParams['MUT_MOD_ACTFUNC_PROB_CL']
 		self.mutModDropoutCl = knasParams['MUT_MOD_DROPOUT_PROB_CL']
 		self.mutModFiltersCl = knasParams['MUT_MOD_FILTERS_PROB_CL']
 
 
-		# Mutation modify operations
+		# Mutation remove operations for cn layer
 		self.mutRemCnLayer = knasParams['MUT_REM_CNLAYER_PROB']
 		self.mutRemBatchNormCl = knasParams['MUT_REM_BATCHNORM_PROB_CL']
 		self.mutRemAcFuncCl = knasParams['MUT_REM_ACTFUNC_PROB_CL']
@@ -392,48 +392,34 @@ class KNasEA:
 		self.mutRemMaxPoolCl= knasParams['MUT_REM_MAXPOOL_PROB_CL']
 
 
-
-
-
-
-		##############3
-
-		# Mutation probability
+		# Mutation probability for dfc layer
 		self.mutProbDl = knasParams['MUT_PROB_DL']
 
-		# Learning rate mutation
+		# Learning rate mutation for dfc layer
 		self.mutLearningRate = knasParams['MUT_LEARNING_RATE_PROB']
 
-		# Mutation opearations probabilities
+		# Mutation opearations probabilities for dfc layer
 		self.mutAddProbDl = knasParams['MUT_ADD_PROB_DL']
 		self.mutModProbDl = knasParams['MUT_MOD_PROB_DL']
 		self.mutRemProbDl = knasParams['MUT_REM_PROB_DL']
 
-		# Mutation add operations
+		# Mutation add operations for dfc layer
 		self.mutAddHiLayer = knasParams['MUT_ADD_HI_LAYER']
 		self.mutAddBatchNormDl = knasParams['MUT_ADD_BATCHNORM_PROB_DL']
 		self.mutAddAcFuncDl = knasParams['MUT_ADD_ACTFUNC_PROB_DL']
 		self.mutAddDropoutDl = knasParams['MUT_ADD_DROPOUT_PROB_DL']
 
-		# Mutation modify operations
+		# Mutation modify operations for dfc layer
 		self.mutModAcFuncDl = knasParams['MUT_MOD_ACTFUNC_PROB_DL']
 		self.mutModDropoutDl = knasParams['MUT_MOD_DROPOUT_PROB_DL']
 		self.mutModFiltersDl = knasParams['MUT_MOD_FILTERS_PROB_DL']
 
 
-		# Mutation modify operations
+		# Mutation remove operations for dfc layer
 		self.mutRemHiLayer = knasParams['MUT_REM_HIL_PROB']
 		self.mutRemBatchNormDl = knasParams['MUT_REM_BATCHNORM_PROB_DL']
 		self.mutRemAcFuncDl = knasParams['MUT_REM_ACTFUNC_PROB_DL']
 		self.mutRemDropoutDl = knasParams['MUT_REM_DROPOUT_PROB_DL']
-
-
-
-
-
-
-
-
 
 
 		# KNAS parameters for later usage
@@ -458,14 +444,17 @@ class KNasEA:
 		'''
 			This function generates the initial population
 		'''
+		
 		self.logModHand.knasea_log_message(self.logModHand.loggingCodes['INIT_POPULATION_GEN'],'INF')
 
+		
 		# List of individuals as population
 		population=list()
 
 		for i in range(self.popSize):
 			population.append(KNasEAIndividual(self.knasParams))
 
+		
 		return population
 
 
@@ -496,6 +485,20 @@ class KNasEA:
 			meanTestAcc= mean(performanceStatus['test_acc'])
 
 			# Setting the fitness value
+
+			'''
+				Fitness value is calculated through :
+
+					P1: Avg(Test Accuracy
+					
+					P2: 1/(|Avg(Validation_Accuracy) - Avg(Test_Accuracy)|+1)
+					
+					P3: 1/Avg(Training Duration)
+
+					P4: 1/#Learnable_Parameters
+
+					F =  P1 + P2 + P3 + P4
+			'''
 			ind.fitnessVal = meanTestAcc + 1/(abs(meanValAcc - meanTestAcc )+1) + 1/meanTrainDuration + 1/ind.numLearnParams
 
 
@@ -521,7 +524,7 @@ class KNasEA:
 		numLayersInd2 = len(ind2Layers)
 
 		# Setting the individual 1 as the individual 
-		# which has lowest number of layers
+		# which has lower number of layers
 		if numLayersInd2 < numLayersInd1:
 
 			# Switch individuals
@@ -583,17 +586,15 @@ class KNasEA:
 			off2 = ind2Layers[:point21] + ind1Layers[point11:point12+1] + ind2Layers[point22+1:]
 	
 
-			# Swapping dfc layers with 50% probability
-			if random() <= 0.5:
+			# Swapping dfc layers with a specific probability
+			if random() <= self.knasParams["CROSS_SWAP_DFC_PROB"]:
+				
 				ind1.dfcLayer,ind2.dfcLayer=ind2.dfcLayer,ind1.dfcLayer
 
+			
 			# Updating the individuals and making them valid
 			ind1.cnLayersList = off1
-			ind1.make_individual_valid()
-
-
 			ind2.cnLayersList = off2
-			ind1.make_individual_valid()
 
 
 		return ind1,ind2

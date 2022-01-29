@@ -94,7 +94,7 @@ class KNas:
 
 		# First set the dataset module
 		self.datasetModule =  KnasDatasetKmnist(self.knasParams['INPUT_DIM'])
-		
+
 		# First set the EA algorithm handler
 		self.eaAlgo = KNasEA(self.datasetModule,self.knasParams)
 
@@ -107,7 +107,7 @@ class KNas:
 
 
 		# Evaluating the initial population
-		# population = self.eaAlgo.knasea_calculate_fitness(population)
+		population = self.eaAlgo.knasea_calculate_fitness(population)
 
 
 
@@ -138,15 +138,19 @@ class KNas:
 				Mutation
 			'''
 			print("Mutation")
+			
 			off1 = self.eaAlgo.knasea_mutation(off1)
+		
 			# Make the offspring a valid offspring
-
 			off1.make_individual_valid()
 
 
 			off2 = self.eaAlgo.knasea_mutation(off2)
+			
 			# Make the offspring a valid offspring
 			off2.make_individual_valid()
+
+			
 
 			# Evaluating the offsprings as members of a short time population
 			offsPopulation = self.eaAlgo.knasea_calculate_fitness([off1,off2])
@@ -173,24 +177,29 @@ class KNas:
 		# the highest fitness value
 
 		print("EA Finished")
+		print("Report: .... ")
 
+		# Best individual
 		bestIndividual = population[0]
 
+		print("CN Layers: ")
+		for layer in bestIndividual.cnLayersList:
+			print(layer)
 
-		print(bestIndividual.fitnessVal)
-		print(bestIndividual.performanceStatus)
-		
+		print("DFC Layer: ")
 
-
-
-
-
+		print(bestIndividual.dfcLayer)
 
 
+		print("Performance staus ...")
+		for k,v in bestIndividual.performanceStatus.items():
+			print(k,v)
+
+		print("Fitness: ",bestIndividual.fitnessVal)
 
 
-		
-	
+
+
 
 
 

@@ -49,6 +49,9 @@ class KNasConfFile:
 		# Crossover Prob
 		self.crossProbr = '\s*CROSS_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
+		# Crossover swapping dfc probability
+		self.crossSwapDfcProbr = '\s*CROSS_SWAP_DFC_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
 
 		# Mutation prob for cn layer
 		self.mutProbClr = '\s*MUT_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
@@ -250,6 +253,9 @@ class KNasConfFile:
 
 				elif match(self.crossProbr,line):
 					parameters['CROSS_PROB']= float(line.split("=")[1].strip())
+
+				elif match(self.crossSwapDfcProbr,line):
+					parameters['CROSS_SWAP_DFC_PROB']= float(line.split("=")[1].strip())
 
 				elif match(self.mutProbClr,line):
 					parameters['MUT_PROB_CL']= float(line.split("=")[1].strip())
