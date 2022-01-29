@@ -361,32 +361,79 @@ class KNasEA:
 		self.crossProb= knasParams['CROSS_PROB']
 
 		# Mutation probability
-		self.mutProb = knasParams['MUT_PROB']
+		self.mutProbCl = knasParams['MUT_PROB_CL']
+
+		# Learning rate mutation
+		self.mutLearningRate = knasParams['MUT_LEARNING_RATE_PROB']
 
 		# Mutation opearations probabilities
-		self.mutAddProb = knasParams['MUT_ADD_PROB']
-		self.mutModProb = knasParams['MUT_MOD_PROB']
-		self.mutRemProb = knasParams['MUT_REM_PROB']
+		self.mutAddProbCl = knasParams['MUT_ADD_PROB_CL']
+		self.mutModProbCl = knasParams['MUT_MOD_PROB_CL']
+		self.mutRemProbCl = knasParams['MUT_REM_PROB_CL']
 
 		# Mutation add operations
-		self.mutAddCnLayer = 0.3
-		self.mutAddBatchNorm = knasParams['MUT_ADD_BATCHNORM_PROB']
-		self.mutAddAcFunc = knasParams['MUT_ADD_ACTFUNC_PROB']
-		self.mutAddDropout = knasParams['MUT_ADD_DROPOUT_PROB']
-		self.mutAddMaxPool = knasParams['MUT_ADD_MAXPOOL_PROB']
+		self.mutAddCnLayer = knasParams['MUT_ADD_CN_LAYER']
+		self.mutAddBatchNormCl = knasParams['MUT_ADD_BATCHNORM_PROB_CL']
+		self.mutAddAcFuncCl = knasParams['MUT_ADD_ACTFUNC_PROB_CL']
+		self.mutAddDropoutCl = knasParams['MUT_ADD_DROPOUT_PROB_CL']
+		self.mutAddMaxPoolCl = knasParams['MUT_ADD_MAXPOOL_PROB_CL']
 
 		# Mutation modify operations
-		self.mutModAcFunc = knasParams['MUT_MOD_ACTFUNC_PROB']
-		self.mutModDropout = knasParams['MUT_MOD_DROPOUT_PROB']
-		self.mutModFilters = knasParams['MUT_MOD_FILTERS_PROB']
+		self.mutModAcFuncCl = knasParams['MUT_MOD_ACTFUNC_PROB_CL']
+		self.mutModDropoutCl = knasParams['MUT_MOD_DROPOUT_PROB_CL']
+		self.mutModFiltersCl = knasParams['MUT_MOD_FILTERS_PROB_CL']
 
 
 		# Mutation modify operations
 		self.mutRemCnLayer = knasParams['MUT_REM_CNLAYER_PROB']
-		self.mutRemBatchNorm = knasParams['MUT_REM_BATCHNORM_PROB']
-		self.mutRemAcFunc = knasParams['MUT_REM_ACTFUNC_PROB']
-		self.mutRemDropout = knasParams['MUT_REM_DROPOUT_PROB']
-		self.mutRemMaxPool= knasParams['MUT_REM_MAXPOOL_PROB']
+		self.mutRemBatchNormCl = knasParams['MUT_REM_BATCHNORM_PROB_CL']
+		self.mutRemAcFuncCl = knasParams['MUT_REM_ACTFUNC_PROB_CL']
+		self.mutRemDropoutCl = knasParams['MUT_REM_DROPOUT_PROB_CL']
+		self.mutRemMaxPoolCl= knasParams['MUT_REM_MAXPOOL_PROB_CL']
+
+
+
+
+
+
+		##############3
+
+		# Mutation probability
+		self.mutProbDl = knasParams['MUT_PROB_DL']
+
+		# Learning rate mutation
+		self.mutLearningRate = knasParams['MUT_LEARNING_RATE_PROB']
+
+		# Mutation opearations probabilities
+		self.mutAddProbDl = knasParams['MUT_ADD_PROB_DL']
+		self.mutModProbDl = knasParams['MUT_MOD_PROB_DL']
+		self.mutRemProbDl = knasParams['MUT_REM_PROB_DL']
+
+		# Mutation add operations
+		self.mutAddHiLayer = knasParams['MUT_ADD_HI_LAYER']
+		self.mutAddBatchNormDl = knasParams['MUT_ADD_BATCHNORM_PROB_DL']
+		self.mutAddAcFuncDl = knasParams['MUT_ADD_ACTFUNC_PROB_DL']
+		self.mutAddDropoutDl = knasParams['MUT_ADD_DROPOUT_PROB_DL']
+
+		# Mutation modify operations
+		self.mutModAcFuncDl = knasParams['MUT_MOD_ACTFUNC_PROB_DL']
+		self.mutModDropoutDl = knasParams['MUT_MOD_DROPOUT_PROB_DL']
+		self.mutModFiltersDl = knasParams['MUT_MOD_FILTERS_PROB_DL']
+
+
+		# Mutation modify operations
+		self.mutRemHiLayer = knasParams['MUT_REM_HIL_PROB']
+		self.mutRemBatchNormDl = knasParams['MUT_REM_BATCHNORM_PROB_DL']
+		self.mutRemAcFuncDl = knasParams['MUT_REM_ACTFUNC_PROB_DL']
+		self.mutRemDropoutDl = knasParams['MUT_REM_DROPOUT_PROB_DL']
+
+
+
+
+
+
+
+
 
 
 		# KNAS parameters for later usage
@@ -561,6 +608,11 @@ class KNasEA:
 			offspring created from the crossover phase
 		'''
 
+		# Learning rate mutation
+		if random() < self.mutLearningRate:
+			ind.learningRate = random()
+
+
 		'''
 
 			Performing mutatin of the CN layers
@@ -578,16 +630,16 @@ class KNasEA:
 			listl = list(l)
 
 
-			if random() < self.mutProb:
+			if random() < self.mutProbCl:
 
 				# Decide on the type of operation
-				op = choices(["add","mod","rem"],weights=[self.mutAddProb,self.mutModProb,self.mutRemProb],k=1)[0]
+				op = choices(["add","mod","rem"],weights=[self.mutAddProbCl,self.mutModProbCl,self.mutRemProbCl],k=1)[0]
 				
 
 				if op=="add":
 
 					# Decide on the type of add operation
-					addOp =  choices(["addCnLayer","addBatch","addAf","addDr","addMax"],weights=[self.mutAddCnLayer,self.mutAddBatchNorm,self.mutAddAcFunc,self.mutAddDropout,self.mutAddMaxPool],k=1)[0]
+					addOp =  choices(["addCnLayer","addBatch","addAf","addDr","addMax"],weights=[self.mutAddCnLayer,self.mutAddBatchNormCl,self.mutAddAcFuncCl,self.mutAddDropoutCl,self.mutAddMaxPoolCl],k=1)[0]
 					
 					# Adding a new CN layer
 					if (addOp=="addCnLayer"):
@@ -610,7 +662,7 @@ class KNasEA:
 
 
 						# Setting the add operation for the layer we choosed in the iteration
-						addOp =  choices(["addBatch","addAf","addDr","addMax"],weights=[self.mutAddBatchNorm,self.mutAddAcFunc,self.mutAddDropout,self.mutAddMaxPool],k=1)[0]
+						addOp =  choices(["addBatch","addAf","addDr","addMax"],weights=[self.mutAddBatchNormCl,self.mutAddAcFuncCl,self.mutAddDropoutCl,self.mutAddMaxPoolCl],k=1)[0]
 
 
 
@@ -634,6 +686,8 @@ class KNasEA:
 
 						# Number of filters in conv2d componendt
 						filterCount = components[0].out_channels
+
+						print("add batch")
 						
 						components[1] = BatchNorm2d(filterCount)
 
@@ -664,7 +718,7 @@ class KNasEA:
 				elif op == "mod":
 
 					# Decide on the type of modify operation
-					modOp =  choices(["modAf","modDr","modFil"],weights=[self.mutModAcFunc,self.mutModDropout,self.mutModFilters],k=1)[0]
+					modOp =  choices(["modAf","modDr","modFil"],weights=[self.mutModAcFuncCl,self.mutModDropoutCl,self.mutModFiltersCl],k=1)[0]
 
 					if modOp == "modAf":
 
@@ -715,7 +769,7 @@ class KNasEA:
 				elif op=="rem":
 
 					# Decide on the type of remove operation
-					remOp =  choices(["remCnLayer","remBatch","remAf","remDr","remMax"],weights=[self.mutRemCnLayer,self.mutRemBatchNorm,self.mutRemAcFunc,self.mutRemDropout,self.mutRemMaxPool],k=1)[0]
+					remOp =  choices(["remCnLayer","remBatch","remAf","remDr","remMax"],weights=[self.mutRemCnLayer,self.mutRemBatchNormCl,self.mutRemAcFuncCl,self.mutRemDropoutCl,self.mutRemMaxPoolCl],k=1)[0]
 
 					if remOp == "remCnLayer":
 						continue
@@ -800,23 +854,23 @@ class KNasEA:
 			
 			listl = list(l)
 
-			if random() < self.mutProb:
+			if random() < self.mutProbDl:
 
 				# Decide on the type of operation
-				op = choices(["add","mod","rem"],weights=[self.mutAddProb,self.mutModProb,self.mutRemProb],k=1)[0]
+				op = choices(["add","mod","rem"],weights=[self.mutAddProbDl,self.mutModProbDl,self.mutRemProbDl],k=1)[0]
 				
 
 				if op=="add":
 
 					# Decide on the type of add operation
-					addOp =  choices(["addHiLayer","addBatch","addAf","addDr"],weights=[self.mutAddCnLayer,self.mutAddBatchNorm,self.mutAddAcFunc,self.mutAddDropout],k=1)[0]
+					addOp =  choices(["addHiLayer","addBatch","addAf","addDr"],weights=[self.mutAddHiLayer,self.mutAddBatchNormDl,self.mutAddAcFuncDl,self.mutAddDropoutDl],k=1)[0]
 					
 					# Adding a new hidden layer
 					if (addOp=="addHiLayer"):
 
 						# Check for the maximum number of layers constraint
 						# Add only if there is space to add
-						if len(ind.dfcLayers) < self.knasParams["MAX_CNN"]:
+						if len(dfcLayers) < self.knasParams["MAX_NUM_HIDDEN_LAYERS"]:
 
 							# Creating a random DFC layer, by only sending the
 							# parameters of KNAS
@@ -832,7 +886,7 @@ class KNasEA:
 
 
 						# Setting the add operation for the layer we choosed in the iteration
-						addOp =  choices(["addBatch","addAf","addDr","addMax"],weights=[self.mutAddBatchNorm,self.mutAddAcFunc,self.mutAddDropout,self.mutAddMaxPool],k=1)[0]
+						addOp =  choices(["addBatch","addAf","addDr","addMax"],weights=[self.mutAddBatchNormDl,self.mutAddAcFuncDl,self.mutAddDropoutDl,self.mutAddMaxPoolDl],k=1)[0]
 
 
 
@@ -852,7 +906,7 @@ class KNasEA:
 					# Adding batch norm only if it does not exist
 					if ( addOp == "addBatch" ) and (components[1]==None):
 						# Number of filters in conv2d componendt
-						filterCount = components[0].out_channels
+						filterCount = components[0].out_features
 						
 						components[1] = BatchNorm1d(filterCount)
 
@@ -876,7 +930,7 @@ class KNasEA:
 				elif op == "mod":
 
 					# Decide on the type of modify operation
-					modOp =  choices(["modAf","modDr","modFil"],weights=[self.mutModAcFunc,self.mutModDropout,self.mutModFilters],k=1)[0]
+					modOp =  choices(["modAf","modDr","modFil"],weights=[self.mutModAcFuncDl,self.mutModDropoutDl,self.mutModFiltersDl],k=1)[0]
 
 					if modOp == "modAf":
 
@@ -914,7 +968,7 @@ class KNasEA:
 				elif op=="rem":
 
 					# Decide on the type of remove operation
-					remOp =  choices(["remHiLayer","remBatch","remAf","remDr"],weights=[self.mutRemCnLayer,self.mutRemBatchNorm,self.mutRemAcFunc,self.mutRemDropout],k=1)[0]
+					remOp =  choices(["remHiLayer","remBatch","remAf","remDr"],weights=[self.mutRemHiLayer,self.mutRemBatchNormDl,self.mutRemAcFuncDl,self.mutRemDropoutDl],k=1)[0]
 
 					# Removing a hidden layer
 					if remOp == "remHiLayer":

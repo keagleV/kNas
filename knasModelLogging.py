@@ -21,7 +21,7 @@ class KNasModelLogging:
 
 		}
 
-	def knas_log_message(self,message,status,lineNumer=None):
+	def knas_model_log_message(self,message,status,lineNumer=None):
 
 		'''
 			This function will log the message with its corresponding status

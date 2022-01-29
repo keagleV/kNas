@@ -89,7 +89,7 @@ class KNasModel:
 
 		# Just for informing the user for the availability of the cuda
 		if cuda.is_available() and (device!="cuda"):
-				self.logModHand.knas_log_message(self.logModHand.loggingCodes['CUDA_AVAILABLE'],'INF')
+				self.logModHand.knas_model_log_message(self.logModHand.loggingCodes['CUDA_AVAILABLE'],'INF')
 
 		
 
@@ -126,7 +126,7 @@ class KNasModel:
 		}
 
 
-		self.logModHand.knas_log_message(self.logModHand.loggingCodes['MODEL_TRAINING_STARTED'],'INF')
+		self.logModHand.knas_model_log_message(self.logModHand.loggingCodes['MODEL_TRAINING_STARTED'],'INF')
 
 		# Setting the start time
 		startTime=time()
@@ -254,7 +254,7 @@ class KNasModel:
 		# Setting the end time
 		endTime= time()
 		
-		self.logModHand.knas_log_message(self.logModHand.loggingCodes['MODEL_TRAINING_FINISHED'],'INF')
+		self.logModHand.knas_model_log_message(self.logModHand.loggingCodes['MODEL_TRAINING_FINISHED'],'INF')
 
 		# Setting the training duration
 		modelPerfomanceStatus["training_time"].append(endTime-startTime)

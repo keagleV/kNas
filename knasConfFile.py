@@ -26,6 +26,11 @@ class KNasConfFile:
 		# DEVICE_REGEX
 		self.devicer='\s*DEVICE\s*=\s*(cpu|cuda)\s*'
 
+
+		# Maximum number of hidden layers
+		self.maxHiddenLayersr =  '\s*MAX_NUM_HIDDEN_LAYERS\s*=\s*[1-9][0-9]*\s*'
+		
+
 		# Training Data Root Directory
 		self.trainDataRootDirr = '\s*TRAIN_ROOT_DIR\s*=\s*([^\/]+)(\/([^\/]+))?\s*'
 
@@ -44,63 +49,160 @@ class KNasConfFile:
 		# Mutation Prob
 		self.crossProbr = '\s*CROSS_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
+
+
+
+
+
+
+
 		# Mutation Prob
-		self.mutProbr = '\s*MUT_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
-
-
+		self.mutProbClr = '\s*MUT_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 
 		# Mutation addition prob
-		self.mutAddProbr = '\s*MUT_ADD_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+		self.mutAddProbClr = '\s*MUT_ADD_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 		# Mutation modification prob
-		self.mutModProbr = '\s*MUT_MOD_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+		self.mutModProbClr = '\s*MUT_MOD_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 		# Mutation remove prob
-		self.mutRemProbr = '\s*MUT_REM_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+		self.mutRemProbClr = '\s*MUT_REM_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 
 
+		# Mutation add cn layer
+		self.mutAddCnLayerr = '\s*MUT_ADD_CN_LAYER\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 		# Mutation add batchnorm prob
-		self.mutAddBatchProbr = '\s*MUT_ADD_BATCHNORM_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+		self.mutAddBatchProbClr = '\s*MUT_ADD_BATCHNORM_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 		# Mutation add activation function prob
-		self.mutAddAcFuncProbr = '\s*MUT_ADD_ACTFUNC_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+		self.mutAddAcFuncProbClr = '\s*MUT_ADD_ACTFUNC_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 		# Mutation add dropout prob
-		self.mutAddDropoutProbr = '\s*MUT_ADD_DROPOUT_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+		self.mutAddDropoutProbClr = '\s*MUT_ADD_DROPOUT_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 		# Mutation add maxpool prob
-		self.mutAddMaxPoolProbr = '\s*MUT_ADD_MAXPOOL_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+		self.mutAddMaxPoolProbClr = '\s*MUT_ADD_MAXPOOL_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 
 		# Mutation modification activation function prob
-		self.mutModAcFuncProbr = '\s*MUT_MOD_ACTFUNC_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+		self.mutModAcFuncProbClr = '\s*MUT_MOD_ACTFUNC_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 		# Mutation modification dropout prob
-		self.mutModDropoutProbr = '\s*MUT_MOD_DROPOUT_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+		self.mutModDropoutProbClr = '\s*MUT_MOD_DROPOUT_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 		# Mutation modification filters prob
-		self.mutModFiltersProbr = '\s*MUT_MOD_FILTERS_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+		self.mutModFiltersProbClr = '\s*MUT_MOD_FILTERS_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 
 
 
 		# Mutation remove cn layer prob
-		self.mutRemCnLayerProbr = '\s*MUT_REM_CNLAYER_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+		self.mutRemCnLayerProbr = '\s*MUT_REM_CNLAYER_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 		# Mutation remove batchnorm prob
-		self.mutRemBatchProbr = '\s*MUT_REM_BATCHNORM_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+		self.mutRemBatchProbClr = '\s*MUT_REM_BATCHNORM_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 		# Mutation remove activation function prob
-		self.mutRemAcFuncProbr = '\s*MUT_REM_ACTFUNC_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+		self.mutRemAcFuncProbClr = '\s*MUT_REM_ACTFUNC_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 		# Mutation remove dropout prob
-		self.mutRemDropoutProbr = '\s*MUT_REM_DROPOUT_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+		self.mutRemDropoutProbClr = '\s*MUT_REM_DROPOUT_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 		# Mutation remove maxpool prob
-		self.mutRemMaxPoolProbr = '\s*MUT_REM_MAXPOOL_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+		self.mutRemMaxPoolProbClr = '\s*MUT_REM_MAXPOOL_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+
+
+
+
+
+
+
+		#############################
+
+
+
+
+
+
+
+		# Mutation Prob
+		self.mutProbDlr = '\s*MUT_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+
+		# Mutation addition prob
+		self.mutAddProbDlr = '\s*MUT_ADD_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+		# Mutation modification prob
+		self.mutModProbDlr = '\s*MUT_MOD_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+		# Mutation remove prob
+		self.mutRemProbDlr = '\s*MUT_REM_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+
+
+		# Mutation add Hidden layer
+		self.mutAddHiLayerr = '\s*MUT_ADD_HI_LAYER\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+		# Mutation add batchnorm prob
+		self.mutAddBatchProbDlr = '\s*MUT_ADD_BATCHNORM_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+		# Mutation add activation function prob
+		self.mutAddAcFuncProbDlr = '\s*MUT_ADD_ACTFUNC_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+		# Mutation add dropout prob
+		self.mutAddDropoutProbDlr = '\s*MUT_ADD_DROPOUT_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+		# Mutation add maxpool prob
+		self.mutAddMaxPoolProbDlr = '\s*MUT_ADD_MAXPOOL_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+
+		# Mutation modification activation function prob
+		self.mutModAcFuncProbDlr = '\s*MUT_MOD_ACTFUNC_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+		# Mutation modification dropout prob
+		self.mutModDropoutProbDlr = '\s*MUT_MOD_DROPOUT_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+		# Mutation modification filters prob
+		self.mutModFiltersProbDlr = '\s*MUT_MOD_FILTERS_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+
+
+
+		# Mutation remove Hidden layer prob
+		self.mutRemHiLayerProbr = '\s*MUT_REM_HIL_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+		# Mutation remove batchnorm prob
+		self.mutRemBatchProbDlr = '\s*MUT_REM_BATCHNORM_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+		# Mutation remove activation function prob
+		self.mutRemAcFuncProbDlr = '\s*MUT_REM_ACTFUNC_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+		# Mutation remove dropout prob
+		self.mutRemDropoutProbDlr = '\s*MUT_REM_DROPOUT_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+		# Mutation remove maxpool prob
+		self.mutRemMaxPoolProbDlr = '\s*MUT_REM_MAXPOOL_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
+
+
+
+
+
+
+
+		############################3
+
+
+
+
+
+		# Learning rate mutation
+		self.mutLearningRateProbr = '\s*MUT_LEARNING_RATE_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
+
 
 		# Kernel size
 		self.kernelSizer = '\s*KERNEL_SIZE\s*=\s*[1-9][0-9]*\s*'
@@ -158,6 +260,9 @@ class KNasConfFile:
 				elif match(self.maxCNNLayersr,line):
 					parameters['MAX_CNN']= int(line.split("=")[1].strip())
 
+				elif match(self.maxHiddenLayersr,line):
+					parameters['MAX_NUM_HIDDEN_LAYERS']= int(line.split("=")[1].strip())
+
 				elif match(self.batchSizer,line):
 					parameters['BATCH_SIZE']= int(line.split("=")[1].strip())
 
@@ -185,61 +290,146 @@ class KNasConfFile:
 				elif match(self.crossProbr,line):
 					parameters['CROSS_PROB']= float(line.split("=")[1].strip())
 
-				elif match(self.mutProbr,line):
-					parameters['MUT_PROB']= float(line.split("=")[1].strip())
 
-				elif match(self.mutAddProbr,line):
-					parameters['MUT_ADD_PROB']= float(line.split("=")[1].strip())
 
-				elif match(self.mutModProbr,line):
-					parameters['MUT_MOD_PROB']= float(line.split("=")[1].strip())
 
-				elif match(self.mutRemProbr,line):
-					parameters['MUT_REM_PROB']= float(line.split("=")[1].strip())
+
+				elif match(self.mutProbClr,line):
+					parameters['MUT_PROB_CL']= float(line.split("=")[1].strip())
+
+				elif match(self.mutAddProbClr,line):
+					parameters['MUT_ADD_PROB_CL']= float(line.split("=")[1].strip())
+
+				elif match(self.mutModProbClr,line):
+					parameters['MUT_MOD_PROB_CL']= float(line.split("=")[1].strip())
+
+				elif match(self.mutRemProbClr,line):
+					parameters['MUT_REM_PROB_CL']= float(line.split("=")[1].strip())
 
 				
-				elif match(self.mutAddBatchProbr,line):
-					parameters['MUT_ADD_BATCHNORM_PROB']= float(line.split("=")[1].strip())
+				elif match(self.mutAddCnLayerr,line):
+					parameters['MUT_ADD_CN_LAYER']= float(line.split("=")[1].strip())
 
-				elif match(self.mutAddAcFuncProbr,line):
-					parameters['MUT_ADD_ACTFUNC_PROB']= float(line.split("=")[1].strip())
+				elif match(self.mutAddBatchProbClr,line):
+					parameters['MUT_ADD_BATCHNORM_PROB_CL']= float(line.split("=")[1].strip())
 
-				elif match(self.mutAddDropoutProbr,line):
-					parameters['MUT_ADD_DROPOUT_PROB']= float(line.split("=")[1].strip())
+				elif match(self.mutAddAcFuncProbClr,line):
+					parameters['MUT_ADD_ACTFUNC_PROB_CL']= float(line.split("=")[1].strip())
 
-				elif match(self.mutAddMaxPoolProbr,line):
-					parameters['MUT_ADD_MAXPOOL_PROB']= float(line.split("=")[1].strip())
+				elif match(self.mutAddDropoutProbClr,line):
+					parameters['MUT_ADD_DROPOUT_PROB_CL']= float(line.split("=")[1].strip())
+
+				elif match(self.mutAddMaxPoolProbClr,line):
+					parameters['MUT_ADD_MAXPOOL_PROB_CL']= float(line.split("=")[1].strip())
 
 
-				elif match(self.mutModAcFuncProbr,line):
-					parameters['MUT_MOD_ACTFUNC_PROB']= float(line.split("=")[1].strip())
+				elif match(self.mutModAcFuncProbClr,line):
+					parameters['MUT_MOD_ACTFUNC_PROB_CL']= float(line.split("=")[1].strip())
 
-				elif match(self.mutModDropoutProbr,line):
-					parameters['MUT_MOD_DROPOUT_PROB']= float(line.split("=")[1].strip())
+				elif match(self.mutModDropoutProbClr,line):
+					parameters['MUT_MOD_DROPOUT_PROB_CL']= float(line.split("=")[1].strip())
 
-				elif match(self.mutModFiltersProbr,line):
-					parameters['MUT_MOD_FILTERS_PROB']= float(line.split("=")[1].strip())
+				elif match(self.mutModFiltersProbClr,line):
+					parameters['MUT_MOD_FILTERS_PROB_CL']= float(line.split("=")[1].strip())
 
 
 				elif match(self.mutRemCnLayerProbr,line):
 					parameters['MUT_REM_CNLAYER_PROB']= float(line.split("=")[1].strip())
 
 
-				elif match(self.mutRemBatchProbr,line):
-					parameters['MUT_REM_BATCHNORM_PROB']= float(line.split("=")[1].strip())
+				elif match(self.mutRemBatchProbClr,line):
+					parameters['MUT_REM_BATCHNORM_PROB_CL']= float(line.split("=")[1].strip())
 
 
-				elif match(self.mutRemAcFuncProbr,line):
-					parameters['MUT_REM_ACTFUNC_PROB']= float(line.split("=")[1].strip())
+				elif match(self.mutRemAcFuncProbClr,line):
+					parameters['MUT_REM_ACTFUNC_PROB_CL']= float(line.split("=")[1].strip())
 
 
-				elif match(self.mutRemDropoutProbr,line):
-					parameters['MUT_REM_DROPOUT_PROB']= float(line.split("=")[1].strip())
+				elif match(self.mutRemDropoutProbClr,line):
+					parameters['MUT_REM_DROPOUT_PROB_CL']= float(line.split("=")[1].strip())
 
 
-				elif match(self.mutRemMaxPoolProbr,line):
-					parameters['MUT_REM_MAXPOOL_PROB']= float(line.split("=")[1].strip())
+				elif match(self.mutRemMaxPoolProbClr,line):
+					parameters['MUT_REM_MAXPOOL_PROB_CL']= float(line.split("=")[1].strip())
 
+
+
+				##############
+
+				elif match(self.mutProbDlr,line):
+					parameters['MUT_PROB_DL']= float(line.split("=")[1].strip())
+
+				elif match(self.mutAddProbDlr,line):
+					parameters['MUT_ADD_PROB_DL']= float(line.split("=")[1].strip())
+
+				elif match(self.mutModProbDlr,line):
+					parameters['MUT_MOD_PROB_DL']= float(line.split("=")[1].strip())
+
+				elif match(self.mutRemProbDlr,line):
+					parameters['MUT_REM_PROB_DL']= float(line.split("=")[1].strip())
+
+				
+				elif match(self.mutAddHiLayerr,line):
+					parameters['MUT_ADD_HI_LAYER']= float(line.split("=")[1].strip())
+
+				elif match(self.mutAddBatchProbDlr,line):
+					parameters['MUT_ADD_BATCHNORM_PROB_DL']= float(line.split("=")[1].strip())
+
+				elif match(self.mutAddAcFuncProbDlr,line):
+					parameters['MUT_ADD_ACTFUNC_PROB_DL']= float(line.split("=")[1].strip())
+
+				elif match(self.mutAddDropoutProbDlr,line):
+					parameters['MUT_ADD_DROPOUT_PROB_DL']= float(line.split("=")[1].strip())
+
+				elif match(self.mutAddMaxPoolProbDlr,line):
+					parameters['MUT_ADD_MAXPOOL_PROB_DL']= float(line.split("=")[1].strip())
+
+
+				elif match(self.mutModAcFuncProbDlr,line):
+					parameters['MUT_MOD_ACTFUNC_PROB_DL']= float(line.split("=")[1].strip())
+
+				elif match(self.mutModDropoutProbDlr,line):
+					parameters['MUT_MOD_DROPOUT_PROB_DL']= float(line.split("=")[1].strip())
+
+				elif match(self.mutModFiltersProbDlr,line):
+					parameters['MUT_MOD_FILTERS_PROB_DL']= float(line.split("=")[1].strip())
+
+
+				elif match(self.mutRemHiLayerProbr,line):
+					parameters['MUT_REM_HIL_PROB']= float(line.split("=")[1].strip())
+
+
+				elif match(self.mutRemBatchProbDlr,line):
+					parameters['MUT_REM_BATCHNORM_PROB_DL']= float(line.split("=")[1].strip())
+
+
+				elif match(self.mutRemAcFuncProbDlr,line):
+					parameters['MUT_REM_ACTFUNC_PROB_DL']= float(line.split("=")[1].strip())
+
+
+				elif match(self.mutRemDropoutProbDlr,line):
+					parameters['MUT_REM_DROPOUT_PROB_DL']= float(line.split("=")[1].strip())
+
+
+				elif match(self.mutRemMaxPoolProbDlr,line):
+					parameters['MUT_REM_MAXPOOL_PROB_DL']= float(line.split("=")[1].strip())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+				elif match(self.mutLearningRateProbr,line):
+					parameters['MUT_LEARNING_RATE_PROB']=  float(line.split("=")[1].strip())
 
 				elif match(self.inputDimensionr,line):
 					parameters['INPUT_DIM']= int(line.split("=")[1].strip())
