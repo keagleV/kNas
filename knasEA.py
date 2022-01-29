@@ -350,6 +350,7 @@ class KNasEA:
 		self.mutRemProb = knasParams['MUT_REM_PROB']
 
 		# Mutation add operations
+		self.mutAddCnLayer = 12
 		self.mutAddBatchNorm = knasParams['MUT_ADD_BATCHNORM_PROB']
 		self.mutAddAcFunc = knasParams['MUT_ADD_ACTFUNC_PROB']
 		self.mutAddDropout = knasParams['MUT_ADD_DROPOUT_PROB']
@@ -532,6 +533,7 @@ class KNasEA:
 		return ind1,ind2
 	
 	
+
 	def knasea_mutation(self,ind):
 		'''
 			This function will perform the mutation method on the 
@@ -555,6 +557,34 @@ class KNasEA:
 
 				if op=="add":
 
+					# Decide on the type of add operation
+					addOp =  choices(["addCnLayer","addBatch","addAf","addDr","addMax"],weights=[self.mutAddCnLayer,self.mutAddBatchNorm,self.mutAddAcFunc,self.mutAddDropout,self.mutAddMaxPool],k=1)[0]
+					
+					# Adding a new CN layer
+					if (addOp=="addCnLayer"):
+
+						# Check for the maximum number of layers constraint
+						# Add only if there is space to add
+						if len(ind.cnLayersList) < self.knasParams["MAX_CNN"]:
+
+							# Creating a random CN layer, by only sending the
+							# parameters of KNAS
+
+							numLearnParams,newCnLayer = CNLayer(None,None,None,None,None,None,
+											None,None,None,self.knasParams).create_random_cn_layer()
+
+							# Adding number of learnable parameters of this new layer to the individual
+							ind.numLearnParams += numLearnParams
+
+							# Adding the new layer to the list
+							newLayers.append(newCnLayer)
+
+
+						# Setting the add operation for the layer we choosed in the iteration
+						addOp =  choices(["addBatch","addAf","addDr","addMax"],weights=[self.mutAddBatchNorm,self.mutAddAcFunc,self.mutAddDropout,self.mutAddMaxPool],k=1)[0]
+
+
+
 					# Possible components of the given cn layer
 					components = [None]*5
 
@@ -571,9 +601,6 @@ class KNasEA:
 							components[3] = com
 						elif isinstance(com,MaxPool2d):
 							components[4] = com
-
-					# Decide on the type of add operation
-					addOp =  choices(["addBatch","addAf","addDr","addMax"],weights=[self.mutAddBatchNorm,self.mutAddAcFunc,self.mutAddDropout,self.mutAddMaxPool],k=1)[0]
 					
 					# Adding batch norm only if it does not exist
 					if ( addOp == "addBatch" ) and (components[1]==None):
@@ -588,8 +615,6 @@ class KNasEA:
 						
 						# Randomly choose an activation function
 						components[2] = choice([ReLU(),Sigmoid()])
-						
-
 
 					# Adding dropout only if it does not exist
 					elif ( addOp == "addDr") and (components[3]==None):
@@ -606,6 +631,14 @@ class KNasEA:
 					# Removing the None objects from the components list and
 					# updating the listl list
 					listl = [com for com in components if com!=None]
+
+
+
+
+
+
+
+
 
 				elif op == "mod":
 
@@ -701,7 +734,6 @@ class KNasEA:
 								break
 
 				newLayers.append(Sequential(*listl))
-
 
 
 		# Updating the cn layers of the individual

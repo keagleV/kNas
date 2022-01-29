@@ -11,7 +11,9 @@ from torch.nn import Flatten
 from torch.nn import BatchNorm2d
 from torch.nn import BatchNorm1d
 
-
+from random import randint
+from random import choice
+from random import random
 
 class CNLayer():
 
@@ -21,7 +23,7 @@ class CNLayer():
 
 	def __init__(self,in_channels,out_channels,
 						kernel_size,stride,padding,batchNorm,
-						activationFunc,dropoutProb,maxPoolKernelSize):
+						activationFunc,dropoutProb,maxPoolKernelSize,knasParams=None):
 
 		self.in_channels= in_channels
 		
@@ -41,8 +43,37 @@ class CNLayer():
 
 		self.maxPoolKernelSize = maxPoolKernelSize
 
+		self.knasParams = knasParams
 
+
+	def create_random_cn_layer(self):
+		'''
+			This function will create a random cn layer
+		'''
+
+		self.in_channels= randint(1,max(self.knasParams['FILTER_POSS_VALUES']))
+		
+		self.out_channels= choice(self.knasParams['FILTER_POSS_VALUES'])
+		
+		self.kernel_size= self.knasParams['KERNEL_SIZE']
+		
+		self.stride= self.knasParams['STRIDE']
+		
+		self.padding= self.knasParams['PADDING']
+
+		self.batchNorm= choice([True , False]) 
+
+		self.activationFunc = choice(["relu", 'sigmoid',None])
+
+		self.dropoutProb = choice([random(),None])
+
+		self.maxPoolKernelSize = choice([self.knasParams['KERNEL_SIZE'],None])
+
+
+		return self.create_cn_layer()
 	
+
+
 	def create_cn_layer(self):
 
 		'''
