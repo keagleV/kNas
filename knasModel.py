@@ -92,16 +92,16 @@ class KNasModel:
 				self.logModHand.knas_model_log_message(self.logModHand.loggingCodes['CUDA_AVAILABLE'],'INF')
 
 		
-
 		# Creating the model
 		model = KNasLayersNet( 1, cnnLayers , dfcLayer).to(device)		
 
 		
-		# # For DEBUG
+		# For debug case, print the layers in an individual
+		# print("--------dfc------------")
 		# for la in cnnLayers:
 		# 	print(la)
 
-		# print("--------/////------------")
+		# print("--------dfc------------")
 		# print(dfcLayer)
 
 
@@ -128,14 +128,19 @@ class KNasModel:
 
 		self.logModHand.knas_model_log_message(self.logModHand.loggingCodes['MODEL_TRAINING_STARTED'],'INF')
 
-		# Setting the start time
-		startTime=time()
 
 		epoch=0
+		
 		for e in range(0, self.knasParams["EPOCHS"]):
 
-			print("EPOCH: ",epoch)
+			print("Epoch Iter: ",epoch)
 			epoch+=1
+
+
+
+			# Setting the start time
+			startTime=time()
+			
 
 			# Setting the model in training mode
 			model.train()
@@ -153,10 +158,7 @@ class KNasModel:
 			
 
 			# Loopign over the training set
-			i=0
 			for (x, y) in trainDataLoader:
-				# print(i)
-				# i+=1
 
 				# Sending the input to the device
 				(x, y) = (x.to(device), y.to(device))
@@ -177,6 +179,8 @@ class KNasModel:
 				totalTrainLoss += loss
 
 				trainCorrect += (pred.argmax(1) == y).type(tfloat).sum().item()
+
+
 
 
 			# Finding the performance parameters on the validation data
@@ -218,6 +222,8 @@ class KNasModel:
 			
 
 
+
+
 			# Finding the performance parameters on the test data
 			
 			# Total loss value of the testing phase
@@ -251,14 +257,15 @@ class KNasModel:
 				modelPerfomanceStatus["test_loss"].append((testTotalValLoss / testSteps).to(device).detach().item())
 
 
-		# Setting the end time
-		endTime= time()
+			# Setting the end time
+			endTime= time()
 		
+
+			# Setting the training duration of this epoch
+			modelPerfomanceStatus["training_time"].append(endTime-startTime)
+
+
 		self.logModHand.knas_model_log_message(self.logModHand.loggingCodes['MODEL_TRAINING_FINISHED'],'INF')
 
-		# Setting the training duration
-		modelPerfomanceStatus["training_time"].append(endTime-startTime)
-
-
-		#TODO average is rrequired?
+	
 		return modelPerfomanceStatus

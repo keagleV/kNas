@@ -15,6 +15,7 @@ from random import randint
 from random import choice
 from random import random
 
+
 class CNLayer():
 
 	'''
@@ -51,6 +52,8 @@ class CNLayer():
 			This function will create a random cn layer
 		'''
 
+		# Setting parameter of a cn layer randomly
+
 		self.in_channels= 1
 		
 		self.out_channels= choice(self.knasParams['FILTER_POSS_VALUES'])
@@ -70,6 +73,8 @@ class CNLayer():
 		self.maxPoolKernelSize = choice([self.knasParams['KERNEL_SIZE'],None])
 
 
+
+		# Calling create_cn_layer to create a cn layer with random parameters just set
 		return self.create_cn_layer()
 	
 
@@ -129,8 +134,13 @@ class CNLayer():
 
 			listOfModules.append(MaxPool2d(kernel_size=(self.maxPoolKernelSize,self.maxPoolKernelSize)))
 
+
 		# Returning the sequence of the modules in the layer
 		return (numLearnParams, Sequential(*listOfModules).to(self.knasParams["DEVICE"]))
+
+
+
+
 
 
 class DFCLayer():
@@ -172,6 +182,8 @@ class DFCLayer():
 		'''
 			This function will create a random dfc layer
 		'''
+		
+		# Setting parameter of a dfc layer randomly
 
 		self.in_channels= 1
 		
@@ -197,6 +209,7 @@ class DFCLayer():
 
 
 
+		# Calling create_dfc_layer to create a dfc layer with random parameters just set
 
 		return self.create_dfc_layer()
 
@@ -221,7 +234,6 @@ class DFCLayer():
 
 
 		# Checking for the first hidden layer neurons
-
 		if self.fhiNeurons:
 
 
@@ -232,8 +244,9 @@ class DFCLayer():
 			# neurons in the first hidden layer
 			numLearnParams+=1
 
-
+			# Adding first component of the first hidden layer which is Linear component
 			listOfModules.append(Linear(self.in_channels,self.fhiNeurons))
+
 
 			# Check for the batch norm
 			if self.fhiBatchNorm!=None:
@@ -271,6 +284,7 @@ class DFCLayer():
 				# neurons in the second hidden layer
 				numLearnParams+=1
 
+				# Adding first component of the second hidden layer which is Linear component
 				listOfModules.append(Linear(self.fhiNeurons,self.secNeurons))
 
 				# Check for the batch norm
@@ -301,6 +315,8 @@ class DFCLayer():
 
 		# Check for the case with no hidden layers between
 		if len(listOfModules)==0:
+
+			# A dfc layer with no hidden layer, is just a simple Linear component
 			listOfModules.append(Linear(self.in_channels,self.out_channels))
 
 		else:
@@ -310,6 +326,8 @@ class DFCLayer():
 
 		# Returning the sequence of the modules in the layer
 		return (numLearnParams,Sequential(*listOfModules).to(self.knasParams["DEVICE"]))
+
+
 
 
 class KNasLayersNet(Module):

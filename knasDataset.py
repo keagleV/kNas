@@ -5,7 +5,6 @@ from torch.utils.data import random_split
 from torch.utils.data import DataLoader
 from torch import Generator
 from torch import cuda
-
 from os import path
 
 
@@ -42,7 +41,7 @@ class KnasDatasetKmnist:
 		for the KNAS program
 	'''
 
-	def __init__(self):
+	def __init__(self,inputDimension):
 
 		# Root directory of the training data
 		self.trainDataRoot = str()
@@ -64,7 +63,7 @@ class KnasDatasetKmnist:
 
 		# Dataset Transform
 		self.DatasetTransforms = transforms.Compose([
-           transforms.Resize(32),
+           transforms.Resize(inputDimension),
            transforms.ToTensor(),
            transforms.Normalize((0.1307,), (0.3081,)),
 
@@ -97,6 +96,7 @@ class KnasDatasetKmnist:
 
 		# Check for the training data root directory
 		if path.exists(self.trainDataRoot):
+			
 			self.logModHand.knas_kmnist_log_message(self.logModHand.loggingCodes['TRAIN_ROOT_DIR_EXIST'],'INF')
 
 		else:
@@ -113,6 +113,7 @@ class KnasDatasetKmnist:
 		'''
 
 		if path.exists(self.testDataRoot):
+			
 			self.logModHand.knas_kmnist_log_message(self.logModHand.loggingCodes['TEST_ROOT_DIR_EXIST'],'INF')
 
 		else:

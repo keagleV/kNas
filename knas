@@ -10,6 +10,7 @@ from random import choices
 from os import path
 from torch import cuda
 
+
 class KNas:
 	'''
 		This class has implemented the Neural Architecture Search through using
@@ -20,11 +21,14 @@ class KNas:
 		# Configuration file path
 		self.confFilePath = str()
 
+		# KNas parameters
+		self.knasParams=dict()
+
 		# KNas logging module handler
 		self.logModHand = KNasLogging()
 
 		# KNas dataset module
-		self.datasetModule = KnasDatasetKmnist()
+		self.datasetModule = None
 
 		# KNas configuration file module handler
 		self.confModHand = KNasConfFile()
@@ -32,8 +36,6 @@ class KNas:
 		# KNas EA algorithm handler
 		self.eaAlgo = None
 
-		# KNas parameters
-		self.knasParams=dict()
 
 
 
@@ -83,7 +85,6 @@ class KNas:
 				self.knasParams["DEVICE"] = "cpu"
 
 
-	
 
 	def start_evaluation(self):
 		'''
@@ -91,6 +92,9 @@ class KNas:
 			EA algorithm and use the KNAS model classes to evaluate each individual and so on.
 		'''
 
+		# First set the dataset module
+		self.datasetModule =  KnasDatasetKmnist(self.knasParams['INPUT_DIM'])
+		
 		# First set the EA algorithm handler
 		self.eaAlgo = KNasEA(self.datasetModule,self.knasParams)
 

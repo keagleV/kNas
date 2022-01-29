@@ -46,27 +46,21 @@ class KNasConfFile:
 		# Generation evolution count
 		self.genNumr = '\s*GEN_NUM\s*=\s*[1-9][0-9]*\s*'
 
-		# Mutation Prob
+		# Crossover Prob
 		self.crossProbr = '\s*CROSS_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 
-
-
-
-
-
-
-		# Mutation Prob
+		# Mutation prob for cn layer
 		self.mutProbClr = '\s*MUT_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 
-		# Mutation addition prob
+		# Mutation addition prob for cn layer
 		self.mutAddProbClr = '\s*MUT_ADD_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation modification prob
+		# Mutation modification prob for cn layer
 		self.mutModProbClr = '\s*MUT_MOD_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation remove prob
+		# Mutation remove prob for cn layer
 		self.mutRemProbClr = '\s*MUT_REM_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 
@@ -74,93 +68,75 @@ class KNasConfFile:
 		# Mutation add cn layer
 		self.mutAddCnLayerr = '\s*MUT_ADD_CN_LAYER\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation add batchnorm prob
+		# Mutation add batchnorm prob for cn layer
 		self.mutAddBatchProbClr = '\s*MUT_ADD_BATCHNORM_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation add activation function prob
+		# Mutation add activation function prob for cn layer
 		self.mutAddAcFuncProbClr = '\s*MUT_ADD_ACTFUNC_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation add dropout prob
+		# Mutation add dropout prob for cn layer
 		self.mutAddDropoutProbClr = '\s*MUT_ADD_DROPOUT_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation add maxpool prob
+		# Mutation add maxpool prob for cn layer
 		self.mutAddMaxPoolProbClr = '\s*MUT_ADD_MAXPOOL_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 
-		# Mutation modification activation function prob
+		# Mutation modification activation function prob for cn layer
 		self.mutModAcFuncProbClr = '\s*MUT_MOD_ACTFUNC_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation modification dropout prob
+		# Mutation modification dropout prob for cn layer
 		self.mutModDropoutProbClr = '\s*MUT_MOD_DROPOUT_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation modification filters prob
+		# Mutation modification filters prob for cn layer
 		self.mutModFiltersProbClr = '\s*MUT_MOD_FILTERS_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
-
-
 
 
 		# Mutation remove cn layer prob
 		self.mutRemCnLayerProbr = '\s*MUT_REM_CNLAYER_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation remove batchnorm prob
+		# Mutation remove batchnorm prob for cn layer
 		self.mutRemBatchProbClr = '\s*MUT_REM_BATCHNORM_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation remove activation function prob
+		# Mutation remove activation function prob for cn layer
 		self.mutRemAcFuncProbClr = '\s*MUT_REM_ACTFUNC_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation remove dropout prob
+		# Mutation remove dropout prob for cn layer
 		self.mutRemDropoutProbClr = '\s*MUT_REM_DROPOUT_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation remove maxpool prob
+		# Mutation remove maxpool prob for cn layer
 		self.mutRemMaxPoolProbClr = '\s*MUT_REM_MAXPOOL_PROB_CL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 
 
 
-
-
-
-
-		#############################
-
-
-
-
-
-
-
-		# Mutation Prob
+		# Mutation prob for dfc layer
 		self.mutProbDlr = '\s*MUT_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 
-		# Mutation addition prob
+		# Mutation addition prob for dfc layer
 		self.mutAddProbDlr = '\s*MUT_ADD_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 		# Mutation modification prob
 		self.mutModProbDlr = '\s*MUT_MOD_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation remove prob
+		# Mutation remove prob for dfc layer
 		self.mutRemProbDlr = '\s*MUT_REM_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 
 
-		# Mutation add Hidden layer
+		# Mutation add hidden layer
 		self.mutAddHiLayerr = '\s*MUT_ADD_HI_LAYER\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation add batchnorm prob
+		# Mutation add batchnorm prob for dfc layer
 		self.mutAddBatchProbDlr = '\s*MUT_ADD_BATCHNORM_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation add activation function prob
+		# Mutation add activation function prob for dfc layer
 		self.mutAddAcFuncProbDlr = '\s*MUT_ADD_ACTFUNC_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation add dropout prob
+		# Mutation add dropout prob for dfc layer
 		self.mutAddDropoutProbDlr = '\s*MUT_ADD_DROPOUT_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation add maxpool prob
-		self.mutAddMaxPoolProbDlr = '\s*MUT_ADD_MAXPOOL_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
-
-
-		# Mutation modification activation function prob
+		# Mutation modification activation function prob for dfc layer
 		self.mutModAcFuncProbDlr = '\s*MUT_MOD_ACTFUNC_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
 		# Mutation modification dropout prob
@@ -172,32 +148,17 @@ class KNasConfFile:
 
 
 
-		# Mutation remove Hidden layer prob
+		# Mutation remove hidden layer prob 
 		self.mutRemHiLayerProbr = '\s*MUT_REM_HIL_PROB\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation remove batchnorm prob
+		# Mutation remove batchnorm prob for dfc layer
 		self.mutRemBatchProbDlr = '\s*MUT_REM_BATCHNORM_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
 
-		# Mutation remove activation function prob
+		# Mutation remove activation function prob for dfc layer
 		self.mutRemAcFuncProbDlr = '\s*MUT_REM_ACTFUNC_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
-
-		# Mutation remove dropout prob
+ 
+		# Mutation remove dropout prob for dfc layer
 		self.mutRemDropoutProbDlr = '\s*MUT_REM_DROPOUT_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
-
-		# Mutation remove maxpool prob
-		self.mutRemMaxPoolProbDlr = '\s*MUT_REM_MAXPOOL_PROB_DL\s*=\s((?!0+(?:\.0+)?$)\d?\d(?:\.\d\d*)?)\s*'
-
-
-
-
-
-
-
-
-		############################3
-
-
-
 
 
 		# Learning rate mutation
@@ -290,10 +251,6 @@ class KNasConfFile:
 				elif match(self.crossProbr,line):
 					parameters['CROSS_PROB']= float(line.split("=")[1].strip())
 
-
-
-
-
 				elif match(self.mutProbClr,line):
 					parameters['MUT_PROB_CL']= float(line.split("=")[1].strip())
 
@@ -306,7 +263,6 @@ class KNasConfFile:
 				elif match(self.mutRemProbClr,line):
 					parameters['MUT_REM_PROB_CL']= float(line.split("=")[1].strip())
 
-				
 				elif match(self.mutAddCnLayerr,line):
 					parameters['MUT_ADD_CN_LAYER']= float(line.split("=")[1].strip())
 
@@ -322,7 +278,6 @@ class KNasConfFile:
 				elif match(self.mutAddMaxPoolProbClr,line):
 					parameters['MUT_ADD_MAXPOOL_PROB_CL']= float(line.split("=")[1].strip())
 
-
 				elif match(self.mutModAcFuncProbClr,line):
 					parameters['MUT_MOD_ACTFUNC_PROB_CL']= float(line.split("=")[1].strip())
 
@@ -332,29 +287,20 @@ class KNasConfFile:
 				elif match(self.mutModFiltersProbClr,line):
 					parameters['MUT_MOD_FILTERS_PROB_CL']= float(line.split("=")[1].strip())
 
-
 				elif match(self.mutRemCnLayerProbr,line):
 					parameters['MUT_REM_CNLAYER_PROB']= float(line.split("=")[1].strip())
-
 
 				elif match(self.mutRemBatchProbClr,line):
 					parameters['MUT_REM_BATCHNORM_PROB_CL']= float(line.split("=")[1].strip())
 
-
 				elif match(self.mutRemAcFuncProbClr,line):
 					parameters['MUT_REM_ACTFUNC_PROB_CL']= float(line.split("=")[1].strip())
-
 
 				elif match(self.mutRemDropoutProbClr,line):
 					parameters['MUT_REM_DROPOUT_PROB_CL']= float(line.split("=")[1].strip())
 
-
 				elif match(self.mutRemMaxPoolProbClr,line):
 					parameters['MUT_REM_MAXPOOL_PROB_CL']= float(line.split("=")[1].strip())
-
-
-
-				##############
 
 				elif match(self.mutProbDlr,line):
 					parameters['MUT_PROB_DL']= float(line.split("=")[1].strip())
@@ -367,7 +313,6 @@ class KNasConfFile:
 
 				elif match(self.mutRemProbDlr,line):
 					parameters['MUT_REM_PROB_DL']= float(line.split("=")[1].strip())
-
 				
 				elif match(self.mutAddHiLayerr,line):
 					parameters['MUT_ADD_HI_LAYER']= float(line.split("=")[1].strip())
@@ -380,9 +325,6 @@ class KNasConfFile:
 
 				elif match(self.mutAddDropoutProbDlr,line):
 					parameters['MUT_ADD_DROPOUT_PROB_DL']= float(line.split("=")[1].strip())
-
-				elif match(self.mutAddMaxPoolProbDlr,line):
-					parameters['MUT_ADD_MAXPOOL_PROB_DL']= float(line.split("=")[1].strip())
 
 
 				elif match(self.mutModAcFuncProbDlr,line):
@@ -411,23 +353,6 @@ class KNasConfFile:
 					parameters['MUT_REM_DROPOUT_PROB_DL']= float(line.split("=")[1].strip())
 
 
-				elif match(self.mutRemMaxPoolProbDlr,line):
-					parameters['MUT_REM_MAXPOOL_PROB_DL']= float(line.split("=")[1].strip())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 				elif match(self.mutLearningRateProbr,line):
 					parameters['MUT_LEARNING_RATE_PROB']=  float(line.split("=")[1].strip())
 
@@ -454,122 +379,10 @@ class KNasConfFile:
 				elif match(self.HiddenLayerNeuronsPossValuesr,line):
 					parameters['HIDDEN_LAYERS_NEURONS_POSS_VALUE']= literal_eval(line.split("=")[1].strip())
 
-				# Error
+				# In the case of erro, return None as status and line number
 				else:
 					return None,lineNum
 
 
 
 		return True,parameters
-	# def get_splitseed_value(self,definition):
-
-	# 	'''
-	# 		This function will return the split seed value from the definition line
-	# 	'''
-		
-	# 	if match(self.splitSeedr,definition):
-	# 		return definition.split("=")[1].strip()
-
-	# 	return None
-
-
-
-	# def get_max_cnn_layer_value(self,definition):
-
-	# 	'''
-	# 		This function will return the maximum cnn layers value from the definition line
-	# 	'''
-		
-	# 	if match(self.maxCNNLayersr,definition):
-	# 		return definition.split("=")[1].strip()
-
-	# 	return None
-
-
-	# def get_batchSize_value(self,definition):
-
-	# 	'''
-	# 		This function will return the batch size value from the definition line
-	# 	'''
-		
-	# 	if match(self.batchSizer,definition):
-	# 		return definition.split("=")[1].strip()
-
-	# 	return None
-
-
-
-
-	# def get_epochs_value(self,definition):
-
-	# 	'''
-	# 		This function will return the epochs value from the definition line
-	# 	'''
-		
-	# 	if match(self.epochsr,definition):
-	# 		return definition.split("=")[1].strip()
-
-	# 	return None
-
-	
-
-
-
-	# def get_trainsplit_value(self,definition):
-
-	# 	'''
-	# 		This function will return the train split value from the definition line
-	# 	'''
-		
-	# 	if match(self.trainSplitr,definition):
-	# 		return definition.split("=")[1].strip()
-
-	# 	return None
-
-	
-	# def get_device_value(self,definition):
-
-	# 	'''
-	# 		This function will return the device value from the definition line
-	# 	'''
-		
-	# 	if match(self.devicer,definition):
-	# 		return definition.split("=")[1].strip()
-
-	# 	return None
-
-
-	# def get_trainRootDir_value(self,definition):
-
-	# 	'''
-	# 		This function will return the train root dir value from the definition line
-	# 	'''
-		
-	# 	if match(self.trainDataRootDirr,definition):
-	# 		return definition.split("=")[1].strip()
-
-	# 	return None
-
-
-	# def get_testRootDir_value(self,definition):
-
-	# 	'''
-	# 		This function will return the test root dir value from the definition line
-	# 	'''
-		
-	# 	if match(self.testDataRootDirr,definition):
-	# 		return definition.split("=")[1].strip()
-
-	# 	return None
-
-	# def get_splitseed_value(self,definition):
-
-	# 	'''
-	# 		This function will return the split seed value from the definition line
-	# 	'''
-		
-	# 	if match(self.splitSeedr,definition):
-	# 		return definition.split("=")[1].strip()
-
-	# 	return None
-
