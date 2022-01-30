@@ -176,6 +176,9 @@ class KNas:
 		# EA algorithm finished, the first individual is the one with
 		# the highest fitness value
 
+		# Best individual
+		bestIndividual = population[0]
+
 		print("EA Finished")
 		print("Report: .... \n\n")
 
@@ -183,8 +186,15 @@ class KNas:
 		print("Learning rate: ",bestIndividual.learningRate)
 
 
-		# Best individual
-		bestIndividual = population[0]
+		
+		print("\n\nPerformance staus ...")
+		for k,v in bestIndividual.performanceStatus.items():
+			print(k,v)
+
+		print("Fitness: ",bestIndividual.fitnessVal)
+
+
+
 
 		print("CN Layers: ")
 		print("----------------\n")
@@ -196,12 +206,6 @@ class KNas:
 		print(bestIndividual.dfcLayer)
 
 
-
-		print("\n\nPerformance staus ...")
-		for k,v in bestIndividual.performanceStatus.items():
-			print(k,v)
-
-		print("Fitness: ",bestIndividual.fitnessVal)
 
 
 

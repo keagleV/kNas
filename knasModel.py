@@ -95,16 +95,6 @@ class KNasModel:
 		# Creating the model
 		model = KNasLayersNet( cnnLayers , dfcLayer).to(device)		
 
-		
-		# For debug case, print the layers in an individual
-		# print("--------dfc------------")
-		# for la in cnnLayers:
-		# 	print(la)
-
-		# print("--------dfc------------")
-		# print(dfcLayer)
-
-
 
 		# Optimization
 		opt = Adam(model.parameters(), lr= learningRate )

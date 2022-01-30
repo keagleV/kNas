@@ -616,6 +616,8 @@ class KNasEA:
 		# List of new layers after mutation
 		cnNewLayers = []
 
+		# Number of cn layers left in the network
+		numCnLayers = len(ind.cnLayersList)
 
 		# Performing mutation of CN layers
 		for l in ind.cnLayersList:
@@ -679,8 +681,6 @@ class KNasEA:
 
 						# Number of filters in conv2d componendt
 						filterCount = components[0].out_channels
-
-						print("add batch")
 						
 						components[1] = BatchNorm2d(filterCount)
 
@@ -765,7 +765,16 @@ class KNasEA:
 					remOp =  choices(["remCnLayer","remBatch","remAf","remDr","remMax"],weights=[self.mutRemCnLayer,self.mutRemBatchNormCl,self.mutRemAcFuncCl,self.mutRemDropoutCl,self.mutRemMaxPoolCl],k=1)[0]
 
 					if remOp == "remCnLayer":
-						continue
+
+
+
+						# If there is only one layer left, we are not allowed to delete it
+						if numCnLayers==1:
+							dfcNewLayers += listl
+						
+						else:
+							numCnLayers-=1
+							continue
 
 					elif remOp == "remBatch":
 						
@@ -843,6 +852,10 @@ class KNasEA:
 		dfcNewLayers = []
 
 
+		# Number of layers in the dfc layer
+		numDfcLayers = len(dfcLayers)
+
+
 		for l in dfcLayers:
 			
 			listl = list(l)
@@ -879,7 +892,7 @@ class KNasEA:
 
 
 						# Setting the add operation for the layer we choosed in the iteration
-						addOp =  choices(["addBatch","addAf","addDr","addMax"],weights=[self.mutAddBatchNormDl,self.mutAddAcFuncDl,self.mutAddDropoutDl,self.mutAddMaxPoolDl],k=1)[0]
+						addOp =  choices(["addBatch","addAf","addDr"],weights=[self.mutAddBatchNormDl,self.mutAddAcFuncDl,self.mutAddDropoutDl],k=1)[0]
 
 
 
@@ -910,8 +923,7 @@ class KNasEA:
 
 					# Adding dropout only if it does not exist
 					elif ( addOp == "addDr") and (components[3]==None):
-						print("Add dr")
-						
+
 						# Adding a random dropout object
 						components[3] = Dropout(random())
 						
@@ -965,7 +977,14 @@ class KNasEA:
 
 					# Removing a hidden layer
 					if remOp == "remHiLayer":
-						continue
+
+						# If there is only one layer left, we are not allowed to delete it
+						if numDfcLayers==1:
+							dfcNewLayers += listl
+						
+						else:
+							numDfcLayers-=1
+							continue
 
 					elif remOp == "remBatch":
 						# Removing the BatchNorm2d instance in the sequential
