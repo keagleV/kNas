@@ -38,6 +38,9 @@ pip3 install knas-1.0.tar.gz
 | `knasModel.py` |  Defines the methods to train a created model
 | `knasModelLogging.py` |  Defines the methods to log messages to the console for the model training 
 | `Samples/knas.conf`| A configuration file sample
+| `Reports/*`| Some examples of running KNAS program and their results
+| `Doc/*`| Containing documentation of the KNAS program
+
 
 
 
