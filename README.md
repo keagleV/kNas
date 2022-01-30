@@ -21,9 +21,6 @@ To install simply
 ```
 git clone https://github.com/keagleV/knas.git
 cd knas
-echo  PATH=$PATH:$PWD >>  $HOME/.bashrc
-cd dist
-pip3 install knas-1.0.tar.gz
 ```
 ### Files descriptions
 
@@ -48,7 +45,7 @@ pip3 install knas-1.0.tar.gz
 To execute the program, first create a configuration file same as the one in the Samples directory. After creating the configration file, execute:
 
 ```
-knas -f PATH_TO_YOUR_CONF_FILE
+./knas -f PATH_TO_YOUR_CONF_FILE
 ```
 
 ## Future work
